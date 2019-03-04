@@ -89,21 +89,18 @@ public class RawMidiService_None
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private final static Set<String> MONITORABLE_ACTIVITIES
-    = new LinkedHashSet<> (Arrays.asList (new String[]{RawMidiService.ACTIVITY_TX_NAME, RawMidiService.ACTIVITY_RX_NAME}));
-  
-  /** Returns a set holding {@link RawMidiService#ACTIVITY_TX_NAME} and {@link RawMidiService#ACTIVITY_RX_NAME}.
+  /** Returns {@link RawMidiService#MONITORABLE_ACTIVITIES}.
    * 
    * <p>
    * By virtue of the contract of {@link RawMidiService}.
    * 
-   * @return A set holding {@link RawMidiService#ACTIVITY_TX_NAME} and {@link RawMidiService#ACTIVITY_RX_NAME}.
+   * @return {@link RawMidiService#MONITORABLE_ACTIVITIES}.
    * 
    */
   @Override
   public final Set<String> getMonitorableActivities ()
   {
-    return Collections.unmodifiableSet (RawMidiService_None.MONITORABLE_ACTIVITIES);
+    return RawMidiService.MONITORABLE_ACTIVITIES;
   }
 
   /** Returns {@link Instant#MIN}.

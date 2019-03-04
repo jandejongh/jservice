@@ -222,10 +222,18 @@ public class RawMidiService_NetUdpMulticast
     return this.udpMulticastService.lastActivity (monitorableActivity);
   }
 
+  /** Returns {@link RawMidiService#MONITORABLE_ACTIVITIES}.
+   * 
+   * <p>
+   * By virtue of the contract of {@link RawMidiService}.
+   * 
+   * @return {@link RawMidiService#MONITORABLE_ACTIVITIES}.
+   * 
+   */
   @Override
   public final Set<String> getMonitorableActivities ()
   {
-    return this.udpMulticastService.getMonitorableActivities ();
+    return RawMidiService.MONITORABLE_ACTIVITIES;
   }
 
   @Override

@@ -17,6 +17,10 @@
 package org.javajdj.jservice.midi.raw;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.javajdj.jservice.activity.ActivityMonitorable;
 import org.javajdj.jservice.net.UdpMulticastService;
 import org.javajdj.jservice.Service;
@@ -78,5 +82,17 @@ public interface RawMidiService
    * 
    */
   final static String ACTIVITY_RX_NAME = UdpMulticastService.ACTIVITY_RX_NAME;
+  
+  /** The minimum activities that need to be monitored by a {@link RawMidiService}.
+   * 
+   * <p>
+   * Implementations of {@link RawMidiService#getMonitorableActivities} should return
+   * a {@code Set} holding at least the members of {@link #MONITORABLE_ACTIVITIES}.
+   * 
+   * @see #getMonitorableActivities
+   * 
+   */
+  final static Set<String> MONITORABLE_ACTIVITIES = Collections.unmodifiableSet
+    (new LinkedHashSet<> (Arrays.asList (new String[] {RawMidiService.ACTIVITY_TX_NAME, RawMidiService.ACTIVITY_RX_NAME})));
   
 }
