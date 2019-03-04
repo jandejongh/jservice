@@ -90,7 +90,7 @@ public class JColorCheckBox<E>
    * <p>
    * If the map returns a {@code null} value for some key,
    * or is even {@code null} itself,
-   * the checkbox background is <i>not</i> painted.
+   * the check-box background is <i>not</i> painted.
    * 
    * @param colorMap The map; may be {@code null}.
    * 
