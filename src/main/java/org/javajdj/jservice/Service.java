@@ -47,7 +47,7 @@ import java.beans.PropertyChangeListener;
  * These implementations use the default locking model, i.e., they lock on the {@link Object} implementing
  * the interface for synchronization.
  * 
- * @author Jan de Jongh <jfcmdejongh@gmail.com>
+ * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  * 
  */
 public interface Service
@@ -90,7 +90,7 @@ public interface Service
    * The service {@link Status} obtained through this method is obviously just a snapshot,
    * and hence unreliable unless specific (implementation-dependant) locking is in effect.
    * 
-   * @return The service {@link Status}, non-{@link null}.
+   * @return The service {@link Status}, non-{@code null}.
    * 
    */
   Status getStatus ();
@@ -208,6 +208,60 @@ public interface Service
    */
   void stopService ();
   
+  /** Forcibly restarts the service.
+   * 
+   * <p>
+   * Unlike {@link #startService},
+   * which ignores its invocation when the service is already having status {@link Status#ACTIVE},
+   * this method always invokes {@link #stopService} first,
+   * and then {@link #startService}.
+   * Both invocations must be protected by proper synchronization.
+   * The default implementation locks on the {@link Object} implementing the interface.
+   * 
+   */
+  default void restartService ()
+  {
+    synchronized (this)
+    {
+      stopService ();
+      startService ();
+    }
+  }
+  
+  /** Atomically switches the service status between {@link Status#ACTIVE} and {@link Status#STOPPED}.
+   * 
+   * <p>
+   * If the current status is {@link Status#ERROR},
+   * the service is (must be) stopped.
+   * 
+   * <p>
+   * The default implementation locks on the {@link Object} implementing the interface.
+   * 
+   * @see #startService
+   * @see #stopService
+   * 
+   */
+  default void toggleService ()
+  {
+    synchronized (this)
+    {
+      switch (getStatus ())
+      {
+        case STOPPED:
+          startService ();
+          break;
+        case ACTIVE:
+          stopService ();
+          break;
+        case ERROR:
+          stopService ();
+          break;
+        default:
+          throw new RuntimeException ();
+      }
+    }
+  }
+  
   /** Destroys the service and, typically, the {@link Object} implementing it.
    * 
    * <p>
@@ -245,35 +299,6 @@ public interface Service
     {
       removeStatusListeners ();
       stopService ();
-    }
-  }
-  
-  /** Atomically (attempt to) switch the service status, starting it when stopped (or in {@link Status#ERROR}),
-   *  and stopping it when started.
-   * 
-   * <p>
-   * The default implementation locks on the {@link Service} object for atomicity.
-   * It invokes {@link #startService} if the current status is {@link Status#ERROR}.
-   * 
-   */
-  default void toggleService ()
-  {
-    synchronized (this)
-    {
-      switch (getStatus ())
-      {
-        case STOPPED:
-          startService ();
-          break;
-        case ACTIVE:
-          stopService ();
-          break;
-        case ERROR:
-          startService ();
-          break;
-        default:
-          throw new RuntimeException ();
-      }
     }
   }
   
