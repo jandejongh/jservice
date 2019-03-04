@@ -22,11 +22,11 @@ import java.beans.PropertyChangeListener;
  *  and that is expected  to expose its status and notify registered listeners of status changes.
  * 
  * <p>
- In addition to being stopped or active, a service can be in a third state representing a failure to startService or failure
- to continue normal operation.
- Whether or not the service tries to recover from such failures is not part of the service contract.
- 
- <p>
+ * In addition to being stopped or active, a service can be in a third state representing a failure to startService or failure
+ * to continue normal operation.
+ * Whether or not the service tries to recover from such failures is not part of the service contract.
+ * 
+ * <p>
  * Implementation must notify registered listeners of status changes.
  * Registration and un-registration of status listeners ({@link StatusListener})
  * is done through {@link #addStatusListener} and {@link #removeStatusListener}
