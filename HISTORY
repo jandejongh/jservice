@@ -1,0 +1,12 @@
+jservice Release History
+
+Author/Maintainer: Jan de Jongh, TNO
+
+Release 1
+---------
+
+1.0.0-SNAPSHOT
+        - Populating and organizing git repository; licensing, javadoc/quality checks, etc.
+
+1.0.0
+	- First public release on github/jandejongh under Apache 2.0 License.
