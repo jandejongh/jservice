@@ -223,8 +223,13 @@ public class UdpMulticastService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private volatile int port = 36095;
+  private volatile int port; // Set by constructor; no real reasonable default value.
   
+  /** Returns the UDP port.
+   * 
+   * @return The UDP port.
+   * 
+   */
   public final synchronized int getPort ()
   {
     return this.port;
