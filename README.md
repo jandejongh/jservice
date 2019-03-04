@@ -1,9 +1,18 @@
-# jsimulation
-Discrete-Event Simulation in Java
+# jservice
+A small service library in Java with various useful implementation classes.
 
-A small collection of Java packages specifying and implementing discrete-event simulation, including support for events, actions and event lists, and for event-list scheduling and processing.
+A small collection of Java packages for "services"; in this context a service is an object
+that you can start and stop, and is thus typically equiped with a Thread.
 
-Actually part of the jqueues repository (https://github.com/jandejongh/jqueues) yet split off so queues can be connected to (alternative) event-list implementations.
+### Examples
+
+The library comes with various implementation classes that you can use directly,
+but which also serve as example code for implementing a service.
+
+### Software Organization
+
+Maven.
+At the present time, this software is not yet available on Maven Central.
 
 ### Dependencies
 
@@ -11,8 +20,7 @@ None.
 
 ### Documentation
 
-Both jsimulation and jqueues have extensive javadoc comments; a 'Guided Tour' is on its way;
-see https://github.com/jandejongh/jqueues-guided-tour.
+None, except for javadoc.
 
 ### License
 
