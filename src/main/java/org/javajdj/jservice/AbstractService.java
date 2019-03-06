@@ -198,6 +198,21 @@ public abstract class AbstractService
     }
   }
 
+  /** Returns a copy of the set holding the status listeners.
+   * 
+   * <p>
+   * Internally, this class maintains a copy of the status listeners.
+   * It uses that copy in order to avoid concurrency issues (references are atomic).
+   * If the set of status listeners changes, the entire copy is replaced (instead of modifying the set).
+   * 
+   * @return A copy of the set holding the status listeners; the set is not to be modified.
+   * 
+   */
+  protected final Set<StatusListener> getStatusListeners ()
+  {
+    return this.statusListenersCopy;
+  }
+  
   /** Fires a status changed event to registered status listeners.
    * 
    * @param oldStatus The old status, may be {@code null}.
