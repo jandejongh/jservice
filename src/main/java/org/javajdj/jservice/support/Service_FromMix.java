@@ -79,6 +79,14 @@ public class Service_FromMix
       this.targetServices.addAll (targetServices);
   }
 
+  /** Creates a service without initial {@link Runnable}s or {@link Service}s.
+   * 
+   */
+  public Service_FromMix ()
+  {
+    this (null, null);
+  }
+  
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
   // RUNNABLES
