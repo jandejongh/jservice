@@ -98,7 +98,7 @@ public class JRawMidiService
       final Map<Boolean, Color> colorMap = new HashMap<>();
       colorMap.put (false, null);
       colorMap.put (true, Color.red);
-      this.jMidiEnabled = new JColorCheckBox.Boolean (colorMap);
+      this.jMidiEnabled = new JColorCheckBox.JBoolean (colorMap);
       this.jMidiEnabled.setDisplayedValue (false);
       addStatusListener (this.ownStatusListener);    
       this.jMidiEnabled.addMouseListener (new JMIDIEnabledMouseListener ());
@@ -429,7 +429,7 @@ public class JRawMidiService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private final JColorCheckBox.Boolean jMidiEnabled;
+  private final JColorCheckBox.JBoolean jMidiEnabled;
   
   private class JMIDIEnabledMouseListener
     extends DefaultMouseListener
