@@ -30,7 +30,7 @@ import org.javajdj.swing.JColorCheckBox;
  * 
  */
 public class JActivityMonitor
-  extends JColorCheckBox.Boolean
+  extends JColorCheckBox.JBoolean
 {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,11 +53,12 @@ public class JActivityMonitor
    * If the monitor is {@code null}, the component will never show activity.
    * 
    * <p>
-   * If the color function is null, the default function from {@link Boolean} is used.
+   * If the color function is null, the default function from {@link JBoolean} is used.
    * 
    * @param activityMonitor The activity monitor to use, may be {@code null}.
    * @param activity        The activity on the monitor to visualize, may be {@code null}.
-   * @param colorFunction   The color function, see {@link Boolean#Boolean(java.util.function.Function)}.
+   * @param colorFunction   The color function,
+   *                          see {@link JBoolean#JBoolean(java.util.function.Function)}.
    * 
    */
   public JActivityMonitor
@@ -79,11 +80,12 @@ public class JActivityMonitor
    * If the monitor is {@code null}, the component will never show activity.
    * 
    * <p>
-   * If the color map is null, the default color mapping from {@link Boolean} is used.
+   * If the color map is null, the default color mapping from {@link JBoolean} is used.
    * 
    * @param activityMonitor The activity monitor to use, may be {@code null}.
    * @param activity        The activity on the monitor to visualize, may be {@code null}.
-   * @param colorMap        The color map, see {@link Boolean#Boolean(java.util.Map))}.
+   * @param colorMap        The color map,
+   *                          see {@link JBoolean#JBoolean(java.util.Map)}.
    * 
    */
   public JActivityMonitor
@@ -100,7 +102,7 @@ public class JActivityMonitor
    * The default function uses {@link java.awt.Color#green} to indicate activity, and no color for inactivity.
    * 
    * <p>
-   * Note that the default deviates from the default used in {@link Boolean}.
+   * Note that the default deviates from the default used in {@link JBoolean}.
    * 
    * @see JActivityMonitor#JActivityMonitor(org.javajdj.jservice.activity.ActivityMonitor, java.lang.String)
    * 
