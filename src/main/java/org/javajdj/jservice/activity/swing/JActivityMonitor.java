@@ -18,7 +18,6 @@ package org.javajdj.jservice.activity.swing;
 
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.javajdj.jservice.Service;
