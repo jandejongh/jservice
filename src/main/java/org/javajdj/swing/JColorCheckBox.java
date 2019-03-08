@@ -16,6 +16,7 @@
  */
 package org.javajdj.swing;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.util.HashMap;
@@ -226,7 +227,7 @@ public class JColorCheckBox<E>
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // Boolean
+  // JBoolean
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -239,7 +240,7 @@ public class JColorCheckBox<E>
     * @author Jan de Jongh, TNO
     * 
     */
-  public static class Boolean
+  public static class JBoolean
     extends JColorCheckBox<java.lang.Boolean>
   {
     
@@ -263,7 +264,7 @@ public class JColorCheckBox<E>
      * @param colorFunction The color function.
      * 
      */
-    public Boolean (Function<java.lang.Boolean, java.awt.Color> colorFunction)
+    public JBoolean (Function<java.lang.Boolean, java.awt.Color> colorFunction)
     {
       super (colorFunction);
     }
@@ -273,7 +274,7 @@ public class JColorCheckBox<E>
      * @param colorMap The color map.
      * 
      */
-    public Boolean (Map<java.lang.Boolean, java.awt.Color> colorMap)
+    public JBoolean (Map<java.lang.Boolean, java.awt.Color> colorMap)
     {
       super (colorMap);
     }
@@ -285,7 +286,7 @@ public class JColorCheckBox<E>
      * {@code true} with {@link java.awt.Color#GREEN}.
      * 
      */
-    public Boolean ()
+    public JBoolean ()
     {
       this (DEFAULT_BOOLEAN_COLOR_MAP);
     }
@@ -294,7 +295,7 @@ public class JColorCheckBox<E>
    
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // Color
+  // JColor
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -307,11 +308,11 @@ public class JColorCheckBox<E>
     * @author Jan de Jongh, TNO
     * 
     */
-  public static class Color
+  public static class JColor
     extends JColorCheckBox<java.awt.Color>
   {
     
-    public Color ()
+    public JColor ()
     {
       super (Function.identity ());
     }
