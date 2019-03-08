@@ -16,6 +16,7 @@
  */
 package org.javajdj.jservice.activity;
 
+import java.util.Set;
 import org.javajdj.jservice.Service;
 
 /** A {@link Service} that monitors a target {@link ActivityMonitorable} for changes
@@ -82,6 +83,25 @@ public interface ActivityMonitor
    * 
    */
   ActivityMonitorable getActivityMonitorable ();
+  
+  /** Returns the activities being monitored by name.
+   * 
+   * <p>
+   * The set of activities should remain constant after first use of this interface.
+   * 
+   * <p>
+   * The set returned is a subset of the results from {@link ActivityMonitorable#getMonitorableActivities}
+   * on the object returned from {@link #getActivityMonitorable}.
+   * 
+   * <p>
+   * Implementations are strongly encouraged to return a {@code Set} with fixed ordering of the elements.
+   * 
+   * @return A {@code Set} of the activity names being monitored.
+   * 
+   * @see ActivityMonitorable#getMonitorableActivities
+   * 
+   */
+  Set<String> getMonitoredActivities ();
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -152,11 +172,8 @@ public interface ActivityMonitor
    * @param activity The activity {@code String}, may be {@code null}.
    * 
    * @return True if and only if the {@link Service} is {@link Status#ACTIVE},
-   *         given {@code String} is {@code null} or an existing activity on the
-   *         embedded {@link ActivityMonitorable},
-   *         and that particular activity (non-{@code null} argument)
-   *         or the {@link ActivityMonitorable} as a whole ({@code null} argument)
-   *         is currently <i>active</i>.
+   *         monitoring the activity denoted by given {@code String}
+   *         (implying the activity exists on the embedded {@link ActivityMonitorable}).
    * 
    * @see ActivityMonitorable#getMonitorableActivities
    * 
