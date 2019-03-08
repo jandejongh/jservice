@@ -58,7 +58,7 @@ public interface ActivityMonitor
     
     /** Notifies that a monitored activity has changed status.
      * 
-     * @param activity          The activity, may be {@link null}.
+     * @param activity          The activity, may be {@code null}.
      * @param newActivityStatus The new activity status.
      * 
      * @see ActivityMonitorable#getMonitorableActivities
@@ -143,7 +143,7 @@ public interface ActivityMonitor
    * 
    * <p>
    * Note that implementations are free to only check for (new) activity at intervals defined by
-   * {@link #getActivityCheckInterval_ms}, i.e., the {@link #getActivityTimeout} does not have to be exact.
+   * {@link #getActivityCheckInterval_ms}, i.e., the {@link #getActivityTimeout_ms} does not have to be exact.
    * 
    * @return The activity timeout in milli-seconds.
    * 
