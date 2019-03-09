@@ -16,6 +16,9 @@
  */
 package org.javajdj.jservice.midi;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+import org.javajdj.jservice.activity.ActivityMonitorable;
 import org.javajdj.jservice.midi.raw.RawMidiService;
 
 /** A extension of a {@link RawMidiService} that features MIDI message interpretation,
@@ -95,6 +98,57 @@ public interface MidiService
    * 
    */
   void sendMidiSysEx (byte vendorId, byte[] rawMidiMessage);
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // ACTIVITY MONITORABLE
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** The name of the SysEx activity.
+   * 
+   * <p>
+   * This activity refers to transmission and reception of MIDI System Exclusive messages.
+   * 
+   * @see ActivityMonitorable
+   * @see #getMonitorableActivities
+   * 
+   */
+  final static String ACTIVITY_SYSEX_NAME = "SysEx";
+  
+  /** The minimum activities that need to be monitored by a {@link MidiService}.
+   * 
+   * <p>
+   * Implementations of {@link MidiService#getMonitorableActivities} should return
+   * a {@code Set} holding at least the members of {@link #MIDI_SERVICE_MONITORABLE_ACTIVITIES}.
+   * 
+   * <p>
+   * Note that the {@code Set} also contains the members of {@link RawMidiService#RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES}.
+   * 
+   * @see #getMonitorableActivities
+   * @see RawMidiService#RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES
+   * @see #ACTIVITY_SYSEX_NAME
+   * 
+   */
+  final static Set<String> MIDI_SERVICE_MONITORABLE_ACTIVITIES = MonitorableActivitiesInitializer
+    .create (RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES,
+             ACTIVITY_SYSEX_NAME);
+  
+  /** For internal use (initialization of {@link #MIDI_SERVICE_MONITORABLE_ACTIVITIES}.
+   * 
+   */
+  class MonitorableActivitiesInitializer
+  {
+    
+    static Set<String> create (final Set<String> startSet, final String ... stringsToAdd)
+    {
+      final Set<String> stringSet = new LinkedHashSet<> (startSet);
+      for (int i = 0; i < stringsToAdd.length; i++)
+        stringSet.add (stringsToAdd[i]);
+      return stringSet;
+    }
+    
+  };
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
