@@ -105,6 +105,14 @@ public interface MidiService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
+  /** The name of the activity related to MIDI reception errors (incorrectly formatted messages received).
+   * 
+   * @see ActivityMonitorable
+   * @see #getMonitorableActivities
+   * 
+   */
+  final static String ACTIVITY_RX_ERROR_NAME = "RxErr";
+  
   /** The name of the SysEx activity.
    * 
    * <p>
@@ -127,11 +135,13 @@ public interface MidiService
    * 
    * @see #getMonitorableActivities
    * @see RawMidiService#RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES
+   * @see #ACTIVITY_RX_NAME
    * @see #ACTIVITY_SYSEX_NAME
    * 
    */
   final static Set<String> MIDI_SERVICE_MONITORABLE_ACTIVITIES = MonitorableActivitiesInitializer
     .create (RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES,
+             ACTIVITY_RX_ERROR_NAME,
              ACTIVITY_SYSEX_NAME);
   
   /** For internal use (initialization of {@link #MIDI_SERVICE_MONITORABLE_ACTIVITIES}.
