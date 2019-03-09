@@ -87,12 +87,14 @@ public interface RawMidiService
    * 
    * <p>
    * Implementations of {@link RawMidiService#getMonitorableActivities} should return
-   * a {@code Set} holding at least the members of {@link #MONITORABLE_ACTIVITIES}.
+   * a {@code Set} holding at least the members of {@link #RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES}.
    * 
    * @see #getMonitorableActivities
+   * @see #ACTIVITY_TX_NAME
+   * @see #ACTIVITY_RX_NAME
    * 
    */
-  final static Set<String> MONITORABLE_ACTIVITIES = Collections.unmodifiableSet
+  final static Set<String> RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES = Collections.unmodifiableSet
     (new LinkedHashSet<> (Arrays.asList (new String[] {RawMidiService.ACTIVITY_TX_NAME, RawMidiService.ACTIVITY_RX_NAME})));
   
 }

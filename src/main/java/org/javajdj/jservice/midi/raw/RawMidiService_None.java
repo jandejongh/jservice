@@ -17,9 +17,6 @@
 package org.javajdj.jservice.midi.raw;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,18 +86,18 @@ public class RawMidiService_None
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  /** Returns {@link RawMidiService#MONITORABLE_ACTIVITIES}.
+  /** Returns {@link RawMidiService#RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES}.
    * 
    * <p>
    * By virtue of the contract of {@link RawMidiService}.
    * 
-   * @return {@link RawMidiService#MONITORABLE_ACTIVITIES}.
+   * @return {@link RawMidiService#RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES}.
    * 
    */
   @Override
   public final Set<String> getMonitorableActivities ()
   {
-    return RawMidiService.MONITORABLE_ACTIVITIES;
+    return RawMidiService.RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES;
   }
 
   /** Returns {@link Instant#MIN}.
