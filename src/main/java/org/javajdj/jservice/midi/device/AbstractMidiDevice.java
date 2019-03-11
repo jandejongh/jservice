@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.javajdj.jservice.Service;
 import org.javajdj.jservice.midi.DefaultMidiServiceListener;
 import org.javajdj.jservice.midi.MidiService;
 import org.javajdj.jservice.midi.MidiServiceListener;
@@ -135,6 +136,86 @@ public abstract class AbstractMidiDevice<P, D>
   public final void setMidiService (final MidiService midiService)
   {
     throw new UnsupportedOperationException ();
+  }
+  
+  /** Transmits (schedules) a MIDI program change at the MIDI service.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param patch       The patch (program) number, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see MidiService#sendMidiProgramChange
+   * 
+   */
+  protected final void sendMidiProgramChange (final int midiChannel, final int patch)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiProgramChange (midiChannel, patch);
+    }
+  }
+  
+  /** Transmits (schedules) a MIDI control change.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param controller  The MIDI controller number, between zero and 127 inclusive.
+   * @param value       The new value for the controller, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see MidiService#sendMidiControlChange
+   * 
+   */
+  protected final void sendMidiControlChange (final int midiChannel, final int controller, final int value)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiControlChange (midiChannel, controller, value);
+    }
+  }
+
+  /** Transmits (schedules) a MIDI System Exclusive (SysEx) message.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param vendorId       The vendor ID.
+   * @param rawMidiMessage The complete raw MIDI message, non-{@code null}.
+   * 
+   * @throws IllegalArgumentException If {@code vendorId} is out of range,
+   *                                  or if {@code rawMidiMessage} is {@code null}
+   *                                     or an illegally formatted SysEx message
+   *                                     (for the particular vendor ID).
+   * 
+   */
+  protected final void sendMidiSysEx (final byte vendorId, final byte[] rawMidiMessage)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiSysEx (vendorId, rawMidiMessage);
+    }
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
