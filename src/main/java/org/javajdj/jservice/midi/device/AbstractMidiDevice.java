@@ -230,6 +230,13 @@ public abstract class AbstractMidiDevice<P, D>
   
   /** Registers a parameter (for sub-class use only).
    * 
+   * <p>
+   * This method is not final to allow sub-classes to set up and maintain more
+   * refined parameter administrations.
+   * Needless to say,
+   * sub-class implementations <i>must</i> invoke the super
+   * implementation.
+   * 
    * @param key                 The parameter name, non-{@code null} and unique.
    * @param parameterDescriptor The parameter descriptor, non-{@code null}.
    * 
@@ -237,7 +244,7 @@ public abstract class AbstractMidiDevice<P, D>
    *                                    or if the parameter (key) is already registered.
    * 
    */
-  protected final void registerParameter (final String key, final D parameterDescriptor)
+  protected void registerParameter (final String key, final D parameterDescriptor)
   {
     if (key == null || this.parameterMap.keySet ().contains (key)
       || parameterDescriptor == null)
