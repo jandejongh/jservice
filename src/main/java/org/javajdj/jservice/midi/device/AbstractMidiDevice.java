@@ -23,7 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.javajdj.jservice.midi.DefaultMidiServiceListener;
 import org.javajdj.jservice.midi.MidiService;
+import org.javajdj.jservice.midi.MidiServiceListener;
 import org.javajdj.jservice.support.Service_FromMix;
 
 /** A partial implementation of a {@link MidiDevice}.
@@ -58,13 +60,14 @@ public abstract class AbstractMidiDevice<P, D>
    * @param midiService The MIDI service, may be {@code null}.
    * 
    */
-  public AbstractMidiDevice (MidiService midiService)
+  public AbstractMidiDevice (final MidiService midiService)
   {
     super (null, null);
     // XXX For now, midiService is fixed and non-null...
     if (midiService == null)
       throw new IllegalArgumentException ();
     this.midiService = midiService;
+    this.midiService.addMidiServiceListener (this.midiServiceListener);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,6 +335,78 @@ public abstract class AbstractMidiDevice<P, D>
   public final Set entrySet ()
   {
     return Collections.unmodifiableSet (this.parameterMap.entrySet ());
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // MIDI SERVICE LISTENER
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  private final MidiServiceListener midiServiceListener = new DefaultMidiServiceListener ()
+  {
+    
+    @Override
+    public void midiRxProgramChange (final int midiChannel, final int patch)
+    {
+      AbstractMidiDevice.this.onMidiRxProgramChange (midiChannel, patch);
+    }
+
+    @Override
+    public void midiRxControlChange (final int midiChannel, final int controller, final int value)
+    {
+      AbstractMidiDevice.this.onMidiRxControlChange (midiChannel, controller, value);
+    }
+
+    @Override
+    public void midiRxSysEx (final byte vendorId, final byte[] rawMidiMessage)
+    {
+      AbstractMidiDevice.this.onMidiRxSysEx (vendorId, rawMidiMessage);
+    }
+    
+  };
+  
+  /** Invoked when a MIDI Program Change message has been received from the {@link MidiService}.
+   * 
+   * <p>
+   * For sub-class use.
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param patch       The patch (program) number, between zero and 127 inclusive.
+   * 
+   */
+  protected void onMidiRxProgramChange (final int midiChannel, final int patch)
+  {
+  }
+  
+  /** Invoked when a MIDI Control Change message has been received from the {@link MidiService}.
+   * 
+   * <p>
+   * For sub-class use.
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param controller  The MIDI controller number, between zero and 127 inclusive.
+   * @param value       The value for the controller, between zero and 127 inclusive.
+   * 
+   */
+  protected void onMidiRxControlChange (final int midiChannel, final int controller, final int value)
+  {
+  }
+  
+  /** Invoked when a MIDI System Exclusive message has been received from the {@link MidiService}.
+   * 
+   * <p>
+   * For sub-class use.
+   * This implementation does nothing.
+   * 
+   * @param vendorId       The vendor ID.
+   * @param rawMidiMessage The complete raw MIDI message, non-{@code null}.
+   *
+   */
+  protected void onMidiRxSysEx (final byte vendorId, final byte[] rawMidiMessage)
+  {  
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
