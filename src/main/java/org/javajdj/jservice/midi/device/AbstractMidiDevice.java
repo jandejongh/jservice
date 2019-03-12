@@ -37,7 +37,7 @@ import org.javajdj.jservice.support.Service_FromMix;
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  * 
  */
-public abstract class AbstractMidiDevice<P, D>
+public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
   extends Service_FromMix
   implements MidiDevice<P>
 {
@@ -237,17 +237,26 @@ public abstract class AbstractMidiDevice<P, D>
    * sub-class implementations <i>must</i> invoke the super
    * implementation.
    * 
-   * @param key                 The parameter name, non-{@code null} and unique.
+   * <p>
+   * The parameter descriptor provides the key name through {@link ParameterDescriptor#getParameterName}.
+   * It must be non-{@code null} and non-empty (even when trimmed).
+   * 
    * @param parameterDescriptor The parameter descriptor, non-{@code null}.
    * 
    * @throws IllegalArgumentException If either or both argument(s) is {@code null},
+   *                                    the parameter name is illegal,
    *                                    or if the parameter (key) is already registered.
    * 
+   * @see ParameterDescriptor
+   * @see ParameterDescriptor#getParameterName
+   * 
    */
-  protected void registerParameter (final String key, final D parameterDescriptor)
+  protected void registerParameter (final D parameterDescriptor)
   {
-    if (key == null || this.parameterMap.keySet ().contains (key)
-      || parameterDescriptor == null)
+    if (parameterDescriptor == null)
+      throw new IllegalArgumentException ();
+    final String key = parameterDescriptor.getParameterName ();
+    if (key == null || key.trim ().isEmpty () || this.parameterMap.keySet ().contains (key))
       throw new IllegalArgumentException ();
     if (this.parameterDescriptorMap.containsKey (key))
       throw new RuntimeException ();
