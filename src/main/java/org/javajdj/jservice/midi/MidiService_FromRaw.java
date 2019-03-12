@@ -222,7 +222,7 @@ public class MidiService_FromRaw
   {
     if (getStatus () != Status.ACTIVE)
       return;
-    final byte[] midiMessage = MidiUtils.createMidiSysEx (vendorId, rawMidiMessage);
+    final byte[] midiMessage = MidiUtils.createMidiSysExMessage (vendorId, rawMidiMessage);
     sendRawMidiMessage (midiMessage);
     updateActivity (MidiService.ACTIVITY_SYSEX_NAME);
     this.midiServiceListenerSupport.fireMidiTxSysEx (vendorId, rawMidiMessage);

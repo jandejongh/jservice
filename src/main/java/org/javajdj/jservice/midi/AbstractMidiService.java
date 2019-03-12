@@ -120,7 +120,7 @@ public abstract class AbstractMidiService
   {
     if (getStatus () != Status.ACTIVE)
       return;
-    final byte[] midiMessage = MidiUtils.createMidiSysEx (vendorId, rawMidiMessage);
+    final byte[] midiMessage = MidiUtils.createMidiSysExMessage (vendorId, rawMidiMessage);
     sendRawMidiMessage (midiMessage);
     this.midiServiceListenerSupport.fireMidiTxSysEx (vendorId, rawMidiMessage);
   }
