@@ -444,6 +444,18 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
   {
     
     @Override
+    public void midiRxNoteOff (final int midiChannel, final int note, final int velocity)
+    {
+      AbstractMidiDevice.this.onMidiRxNoteOff (midiChannel, note, velocity);
+    }
+    
+    @Override
+    public void midiRxNoteOn (final int midiChannel, final int note, final int velocity)
+    {
+      AbstractMidiDevice.this.onMidiRxNoteOn (midiChannel, note, velocity);
+    }
+
+    @Override
     public void midiRxProgramChange (final int midiChannel, final int patch)
     {
       AbstractMidiDevice.this.onMidiRxProgramChange (midiChannel, patch);
@@ -462,6 +474,36 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
     }
     
   };
+  
+  /** Invoked when a MIDI Note Off message has been received from the {@link MidiService}.
+   * 
+   * <p>
+   * For sub-class use.
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  protected void onMidiRxNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+  }
+  
+  /** Invoked when a MIDI Note On message has been received from the {@link MidiService}.
+   * 
+   * <p>
+   * For sub-class use.
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  protected void onMidiRxNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+  }
   
   /** Invoked when a MIDI Program Change message has been received from the {@link MidiService}.
    * 

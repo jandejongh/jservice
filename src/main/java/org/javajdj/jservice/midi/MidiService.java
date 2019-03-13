@@ -61,6 +61,32 @@ public interface MidiService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
+  /** Transmits (schedules) a MIDI note-off message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see #sendRawMidiMessage
+   * 
+   */
+  void sendMidiNoteOff (int midiChannel, int note, int velocity);
+  
+  /** Transmits (schedules) a MIDI note-on message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see #sendRawMidiMessage
+   * 
+   */
+  void sendMidiNoteOn (int midiChannel, int note, int velocity);
+  
   /** Transmits (schedules) a MIDI program change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
@@ -139,10 +165,10 @@ public interface MidiService
    * @see #ACTIVITY_SYSEX_NAME
    * 
    */
-  final static Set<String> MIDI_SERVICE_MONITORABLE_ACTIVITIES = MonitorableActivitiesInitializer
-    .create (RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES,
-             ACTIVITY_RX_ERROR_NAME,
-             ACTIVITY_SYSEX_NAME);
+  final static Set<String> MIDI_SERVICE_MONITORABLE_ACTIVITIES
+    = MonitorableActivitiesInitializer.create (RAW_MIDI_SERVICE_MONITORABLE_ACTIVITIES,
+                                               ACTIVITY_RX_ERROR_NAME,
+                                               ACTIVITY_SYSEX_NAME);
   
   /** For internal use (initialization of {@link #MIDI_SERVICE_MONITORABLE_ACTIVITIES}.
    * 

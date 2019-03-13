@@ -213,6 +213,18 @@ public class JMidiService
   }
 
   @Override
+  public void sendMidiNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+    this.midiService.sendMidiNoteOff (midiChannel, note, velocity);
+  }
+
+  @Override
+  public void sendMidiNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+    this.midiService.sendMidiNoteOn (midiChannel, note, velocity);
+  }
+
+  @Override
   public void sendMidiProgramChange (final int midiChannel, final int patch)
   {
     this.midiService.sendMidiProgramChange (midiChannel, patch);

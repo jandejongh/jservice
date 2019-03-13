@@ -94,6 +94,26 @@ public abstract class AbstractMidiService
   // MIDI SERVICE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  @Override
+  public final void sendMidiNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiNoteOffMessage (midiChannel, note, velocity);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxNoteOff (midiChannel, note, velocity);
+  }
+
+  @Override
+  public final void sendMidiNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiNoteOnMessage (midiChannel, note, velocity);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxNoteOn (midiChannel, note, velocity);
+  }
   
   @Override
   public final void sendMidiProgramChange (final int midiChannel, final int patch)

@@ -26,7 +26,63 @@ public class MidiUtils
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // MIDI MESSAGE FORMATTING
+  // MIDI MESSAGE FORMATTING [NOTE OFF]
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Creates a MIDI Note Off message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   * @return The newly created raw MIDI message.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   */
+  public final static byte[] createMidiNoteOffMessage (final int midiChannel, final int note, final int velocity)
+  {
+    if (midiChannel < 1 || midiChannel > 16 || note < 0 || note > 127 || velocity < 0 || velocity > 127)
+      throw new IllegalArgumentException ();
+    final byte[] midiMessage = new byte[3];
+    midiMessage[0] = (byte) (0x80 + (midiChannel - 1));
+    midiMessage[1] = (byte) note;
+    midiMessage[2] = (byte) velocity;
+    return midiMessage;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // MIDI MESSAGE FORMATTING [NOTE ON]
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Creates a MIDI Note On message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   * @return The newly created raw MIDI message.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   */
+  public final static byte[] createMidiNoteOnMessage (final int midiChannel, final int note, final int velocity)
+  {
+    if (midiChannel < 1 || midiChannel > 16 || note < 0 || note > 127 || velocity < 0 || velocity > 127)
+      throw new IllegalArgumentException ();
+    final byte[] midiMessage = new byte[3];
+    midiMessage[0] = (byte) (0x90 + (midiChannel - 1));
+    midiMessage[1] = (byte) note;
+    midiMessage[2] = (byte) velocity;
+    return midiMessage;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // MIDI MESSAGE FORMATTING [PROGRAM CHANGE]
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -50,6 +106,12 @@ public class MidiUtils
     return midiMessage;
   }
   
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // MIDI MESSAGE FORMATTING [CONTROL CHANGE]
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   /** Creates a MIDI Control Change message.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
@@ -74,6 +136,12 @@ public class MidiUtils
     return midiMessage;
   }
   
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // MIDI MESSAGE FORMATTING [SYSTEM_COMMON_SYSEX - GENERAL]
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   /** Creates a MIDI System Exclusive (SysEx) message.
    * 
    * @param vendorId       The vendor ID, between 0 and 127 inclusive.
@@ -87,7 +155,7 @@ public class MidiUtils
    *                                     (for the particular vendor ID).
    * 
    */
-  public final static byte[] createMidiSysEx (final byte vendorId, final byte[] rawMidiMessage)
+  public final static byte[] createMidiSysExMessage (final byte vendorId, final byte[] rawMidiMessage)
   {
     if (vendorId < 0)
       throw new IllegalArgumentException ();
@@ -97,6 +165,144 @@ public class MidiUtils
     final byte[] midiMessage = new byte[rawMidiMessage.length];
     System.arraycopy (rawMidiMessage, 0, midiMessage, 0, midiMessage.length);
     return midiMessage;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // MIDI MESSAGE FORMATTING [SYSTEM_COMMON_SYSEX - NON-REAL-TIME - GENERAL INFORMATION]
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  private static final byte[] MIDI_ID_REQ_BC = new byte[]
+  {
+    (byte) 0xF0, // System Exclusive
+    (byte) 0x7E, // Non-Real-Time
+    (byte) 0x7F, // SysEx Channel / Device ID -> All Channel Broadcast Code (0x7F)
+    (byte) 0x06, // General Information
+    (byte) 0x01, // Identity Request
+    (byte) 0xF7  // End System Exclusive
+  };
+  
+  /** Creates a MIDI SysEx Identity Request message, destined to all devices (All Channel Broadcast).
+   * 
+   * @return The MIDI message.
+   * 
+   */
+  public static byte[] createMidiSysExMessage_IdentityRequest ()
+  {
+    return MIDI_ID_REQ_BC.clone ();
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // MIDI MESSAGE DISSECTION
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Dissects a given MIDI Message and returns its type ({@link MidiMessageType}).
+   * 
+   * <p>
+   * Only a basic dissection into the "main" MIDI messages is performed.
+   * In particular, dissection of system messages, including System Exclusive, is incomplete.
+   * 
+   * @param rawMidiMessage The message.
+   * 
+   * @return The MIDI message type; {@link MidiMessageType#INVALID} if the message was deemed invalid.
+   * 
+   * @throws IllegalArgumentException If the message is {@code null} or empty.
+   * 
+   */
+  public static MidiMessageType dissectMidiMessage (final byte[] rawMidiMessage)
+  {
+    // If the message is null or empty, there most likely something wrong at our caller.
+    // So, in these cases, we simply throw an IllegalArgumentException.
+    if (rawMidiMessage == null || rawMidiMessage.length == 0)
+      throw new IllegalArgumentException ();
+    // ANY MIDI message must start with a status byte, i.e., having its msb set to 1.
+    // If not, we return INVALID (in Java, bytes are signed, so this condition amounts to the byte being non-negative).
+    final byte statusByte = rawMidiMessage[0];
+    if (statusByte >= 0)
+      return MidiMessageType.INVALID;
+    // We now grab the first nibble in the status byte and consider the 8 different options.
+    final int statusMsbNibble = statusByte & 0xF0;
+    switch (statusMsbNibble)
+    {
+      case 0x80:
+      {
+        // Note Off: Two status bytes (note and velocity).
+        if (rawMidiMessage.length == 3 && rawMidiMessage[1] >= 0 && rawMidiMessage[2] >= 0)
+          return MidiMessageType.NOTE_OFF;
+        else
+          return MidiMessageType.INVALID;
+      }
+      case 0x90:
+      {
+        // Note On: Two status bytes (note and velocity).
+        if (rawMidiMessage.length == 3 && rawMidiMessage[1] >= 0 && rawMidiMessage[2] >= 0)
+          return MidiMessageType.NOTE_ON;
+        else
+          return MidiMessageType.INVALID;
+      }
+      case 0xA0:
+      {
+        // Polyphonic Key Pressure/Aftertouch: Two status bytes (note and pressure).
+        if (rawMidiMessage.length == 3 && rawMidiMessage[1] >= 0 && rawMidiMessage[2] >= 0)
+          return MidiMessageType.POLYPHONIC_KEY_PRESSURE_AFTERTOUCH;
+        else
+          return MidiMessageType.INVALID;
+      }
+      case 0xB0:
+      {
+        // Control Change: Two data bytes (controller and value/data).
+        if (rawMidiMessage.length == 3 && rawMidiMessage[1] >= 0 && rawMidiMessage[2] >= 0)
+          return MidiMessageType.CONTROL_CHANGE;
+        else
+          return MidiMessageType.INVALID;
+      }
+      case 0xC0:
+      {
+        // Program Change: Single data byte (program/patch).
+        if (rawMidiMessage.length == 2 && rawMidiMessage[1] >= 0)
+          return MidiMessageType.PROGRAM_CHANGE;
+        else
+          return MidiMessageType.INVALID;
+      }
+      case 0xD0:
+      {
+        // Channel Pressure/Aftertouch: Single data byte (pressure).
+        if (rawMidiMessage.length == 2 && rawMidiMessage[1] >= 0)
+          return MidiMessageType.CHANNEL_PRESSURE_AFTERTOUCH;
+        else
+          return MidiMessageType.INVALID;
+      }
+      case 0xE0:
+      {
+        // Pitch Bend Change: Two data bytes (LSB and MSB).
+        if (rawMidiMessage.length == 3 && rawMidiMessage[1] >= 0 && rawMidiMessage[2] >= 0)
+          return MidiMessageType.PITCH_BEND_CHANGE;
+        else
+          return MidiMessageType.INVALID;
+      }
+      case 0xF0:
+      {
+        // System Exclusive: 0xF0 vendorId data_1 ... data_n 0xF7.
+        // XXX TODO This is incomplete!!
+        if (rawMidiMessage.length >= 3 && (rawMidiMessage[rawMidiMessage.length - 1] & 0xFF) == 0xF7)
+        {
+          for (int i = 1; i < rawMidiMessage.length - 1; i++)
+            if (rawMidiMessage[i] < 0)
+              return MidiMessageType.INVALID;
+          return MidiMessageType.SYSTEM_COMMON_SYSEX;
+        }
+        // XXX SUPPORT OTHER SYSTEM MESSAGES XXX TODO
+        else
+          return MidiMessageType.INVALID;
+      }
+      default:
+      {
+        throw new RuntimeException ();
+      }
+    }
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

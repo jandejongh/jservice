@@ -29,6 +29,54 @@ public interface MidiServiceListener
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // NOTE OFF
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Notification of the transmission of a MIDI Note Off message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  void midiTxNoteOff (int midiChannel, int note, int velocity);
+  
+  /** Notification of the reception of a MIDI Note Off message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  void midiRxNoteOff (int midiChannel, int note, int velocity);
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // NOTE ON
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Notification of the transmission of a MIDI Note On message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  void midiTxNoteOn (int midiChannel, int note, int velocity);
+  
+  /** Notification of the reception of a MIDI Note On message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  void midiRxNoteOn (int midiChannel, int note, int velocity);
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // PROGRAM (PATCH) CHANGE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

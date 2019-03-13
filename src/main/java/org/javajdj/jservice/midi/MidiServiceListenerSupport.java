@@ -74,6 +74,78 @@ public class MidiServiceListenerSupport
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
+  /** Notifies listeners of the transmission of a MIDI note off message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiTxNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiTxNoteOff (midiChannel, note, velocity);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI note off message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiRxNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiRxNoteOff (midiChannel, note, velocity);
+  }
+  
+  /** Notifies listeners of the transmission of a MIDI note on message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiTxNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiTxNoteOn (midiChannel, note, velocity);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI note on message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiRxNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiRxNoteOn (midiChannel, note, velocity);
+  }
+  
   /** Notifies listeners of the transmission of a MIDI program (patch) change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.

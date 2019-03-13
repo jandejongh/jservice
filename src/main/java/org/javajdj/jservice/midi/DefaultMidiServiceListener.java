@@ -27,6 +27,84 @@ public class DefaultMidiServiceListener
   implements MidiServiceListener
 {
   
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // NOTE OFF
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Notification of the transmission of a MIDI Note Off message.
+   * 
+   * <p>
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  @Override
+  public void midiTxNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+  }
+
+  /** Notification of the reception of a MIDI Note Off message.
+   * 
+   * <p>
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  @Override
+  public void midiRxNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // NOTE ON
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Notification of the transmission of a MIDI Note On message.
+   * 
+   * <p>
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  @Override
+  public void midiTxNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+  }
+
+  /** Notification of the reception of a MIDI Note On message.
+   * 
+   * <p>
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  @Override  
+  public void midiRxNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // PROGRAM CHANGE
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   /** Notification of the transmission of a MIDI program (patch) change.
    * 
    * <p>

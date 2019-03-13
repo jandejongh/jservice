@@ -123,6 +123,54 @@ public class MidiService_FromRaw
     this.midiServiceListenerSupport.removeMidiServiceListener (l);
   }
 
+  /** Notifies listeners of the transmission of a MIDI note off message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiTxNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+    this.midiServiceListenerSupport.fireMidiTxNoteOff (midiChannel, note, velocity);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI note off message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiRxNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+    this.midiServiceListenerSupport.fireMidiRxNoteOff (midiChannel, note, velocity);
+  }
+  
+  /** Notifies listeners of the transmission of a MIDI note on message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiTxNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+    this.midiServiceListenerSupport.fireMidiTxNoteOn (midiChannel, note, velocity);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI note on message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiRxNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+    this.midiServiceListenerSupport.fireMidiRxNoteOn (midiChannel, note, velocity);
+  }
+  
   /** Notifies registered {@link MidiServiceListener}s of the transmission of a MIDI program (patch) change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
@@ -197,6 +245,26 @@ public class MidiService_FromRaw
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
+  @Override
+  public final void sendMidiNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiNoteOffMessage (midiChannel, note, velocity);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxNoteOff (midiChannel, note, velocity);    
+  }
+  
+  @Override
+  public final void sendMidiNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiNoteOnMessage (midiChannel, note, velocity);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxNoteOn (midiChannel, note, velocity);
+  }
+    
   @Override
   public final void sendMidiProgramChange (final int midiChannel, final int patch)
   {
@@ -285,7 +353,9 @@ public class MidiService_FromRaw
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  volatile int rxErrors = 0;
+  private volatile int rxErrors = 0;
+  
+  private final Object rxErrorsLock = new Object ();
   
   private final RawMidiServiceListener rawMidiServiceListener = new RawMidiServiceListener ()
   {
@@ -312,65 +382,86 @@ public class MidiService_FromRaw
       // XXX We should do this; BUT APPARENTLY WE ARE NOT STARTED??
       //if (MidiService_FromRaw.this.getStatus () == Status.STOPPED)
       //  return;
-      if (rawMidiMessage != null && rawMidiMessage.length > 0 && rawMidiMessage[0] < 0 /* STATUS BYTE */)
+      if (rawMidiMessage == null || rawMidiMessage.length == 0)
       {
-        final int statusByte = ((int) rawMidiMessage[0]) & 0xFF;
-        final int length = rawMidiMessage.length;
-        if (length == 2 && ((statusByte & 0xF0) == 0xC0))
+        LOG.log (Level.SEVERE, "Received null or empty MIDI message from Raw Midi Service {0}; ignored!",
+          MidiService_FromRaw.this.rawMidiService);
+        return;
+      }
+      final MidiMessageType midiMessageType = MidiUtils.dissectMidiMessage (rawMidiMessage);
+      final int statusByte = rawMidiMessage[0] & 0xFF;
+      switch (midiMessageType)
+      {
+        case INVALID:
         {
-          // Program Change
-          if (rawMidiMessage[1] < 0)
+          LOG.log (Level.WARNING, "Received invalid (or unsupported) MIDI message (ignored): {0}.",
+            HexUtils.bytesToHex (rawMidiMessage));
+          synchronized (MidiService_FromRaw.this.rxErrorsLock)
           {
-            MidiService_FromRaw.this.rxErrors++; // XXX CONCURRENCY?
-            MidiService_FromRaw.this.updateActivity (MidiService.ACTIVITY_RX_ERROR_NAME);          
+            MidiService_FromRaw.this.rxErrors++;
           }
-          else
-          {
-            final int midiChannel = (statusByte & 0x0F) + 1;
-            final int patch = (byte) rawMidiMessage[1];
-            fireMidiRxProgramChange (midiChannel, patch);
-            // LOG.log (Level.INFO, "Received program change, channel={0}, patch={1}.", new Object[]{midiChannel, patch});
-          }
+          MidiService_FromRaw.this.updateActivity (MidiService.ACTIVITY_RX_ERROR_NAME);
+          break;
         }
-        else if (length == 3 && ((statusByte & 0xF0) == 0xB0))
+        case NOTE_OFF:
         {
-          // Program Change
-          if (rawMidiMessage[1] < 0 || rawMidiMessage[2] < 0)
-          {
-            MidiService_FromRaw.this.rxErrors++; // XXX CONCURRENCY?
-            MidiService_FromRaw.this.updateActivity (MidiService.ACTIVITY_RX_ERROR_NAME);
-          }
-          else
-          {
-            final int midiChannel = (statusByte & 0x0F) + 1;
-            final int controller = rawMidiMessage[1];
-            final int value = rawMidiMessage[2];
-            fireMidiRxControlChange (midiChannel, controller, value);
-            //LOG.log (Level.INFO, "Received control change, channel={0}, controller={1}, value={2}.",
-            //  new Object[]{midiChannel, controller, value});
-          }          
+          final int midiChannel = (statusByte & 0x0F) + 1;
+          final int note = (byte) rawMidiMessage[1];
+          final int velocity = (byte) rawMidiMessage[2];
+          fireMidiRxNoteOff (midiChannel, note, velocity);
+          // LOG.log (Level.INFO, "Received note off, channel={0}, note={1}, velocity={2}.",
+          //   new Object[]{midiChannel, note, velocity});
+          break;
         }
-        else if (length >= 3 && statusByte == 0xF0 && (rawMidiMessage[length - 1] & 0xFF) == 0xF7)
+        case NOTE_ON:
+        {
+          final int midiChannel = (statusByte & 0x0F) + 1;
+          final int note = (byte) rawMidiMessage[1];
+          final int velocity = (byte) rawMidiMessage[2];
+          fireMidiRxNoteOn (midiChannel, note, velocity);
+          // LOG.log (Level.INFO, "Received note on, channel={0}, note={1}, velocity={2}.",
+          //   new Object[]{midiChannel, note, velocity});
+          break;
+        }
+        case CHANNEL_PRESSURE_AFTERTOUCH:
+        {
+          throw new UnsupportedOperationException ();
+          // break
+        }
+        case PROGRAM_CHANGE:
+        {
+          final int midiChannel = (statusByte & 0x0F) + 1;
+          final int patch = (byte) rawMidiMessage[1];
+          fireMidiRxProgramChange (midiChannel, patch);
+          // LOG.log (Level.INFO, "Received program change, channel={0}, patch={1}.", new Object[]{midiChannel, patch});
+          break;
+        }
+        case CONTROL_CHANGE:
+        {
+          final int midiChannel = (statusByte & 0x0F) + 1;
+          final int controller = rawMidiMessage[1];
+          final int value = rawMidiMessage[2];
+          fireMidiRxControlChange (midiChannel, controller, value);
+          // LOG.log (Level.INFO, "Received control change, channel={0}, controller={1}, value={2}.",
+          //   new Object[]{midiChannel, controller, value});
+          break;
+        }
+        case POLYPHONIC_KEY_PRESSURE_AFTERTOUCH:
+          throw new UnsupportedOperationException ();
+        case PITCH_BEND_CHANGE:
+          throw new UnsupportedOperationException ();
+        case SYSTEM_COMMON_SYSEX:
         {
           // System Exclusive
           final byte vendorId = rawMidiMessage[1];
           MidiService_FromRaw.this.updateActivity (MidiService.ACTIVITY_SYSEX_NAME);
           fireMidiRxSysEx (vendorId, rawMidiMessage);
           // LOG.log (Level.INFO, "Received system exclusive, vendorId={0}, rawMidiMessage={1}.",
-          //  new Object[]{HexUtils.bytesToHex (new byte[]{vendorId}), HexUtils.bytesToHex (rawMidiMessage)});
+          //   new Object[]{HexUtils.bytesToHex (new byte[]{vendorId}), HexUtils.bytesToHex (rawMidiMessage)});
+          break;
         }
-        else
-        {
-          MidiService_FromRaw.this.rxErrors++; // XXX CONCURRENCY?
-          MidiService_FromRaw.this.updateActivity (MidiService.ACTIVITY_RX_ERROR_NAME);          
-          LOG.log (Level.WARNING, "Unknown MIDI Message {0}.", HexUtils.bytesToHex (rawMidiMessage));      
-        }
-      }
-      else
-      {
-        MidiService_FromRaw.this.rxErrors++; // XXX CONCURRENCY?
-        MidiService_FromRaw.this.updateActivity (MidiService.ACTIVITY_RX_ERROR_NAME);          
-        LOG.log (Level.WARNING, "Unknown MIDI Message {0}.", HexUtils.bytesToHex (rawMidiMessage));
+        default:
+          throw new RuntimeException ();
       }
     }
   };
