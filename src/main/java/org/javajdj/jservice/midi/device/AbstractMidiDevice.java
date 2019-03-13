@@ -138,6 +138,8 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
     throw new UnsupportedOperationException ();
   }
   
+  // XXX Note Off / On... XXX TODO
+  
   /** Transmits (schedules) a MIDI program change at the MIDI service.
    * 
    * <p>
@@ -312,6 +314,22 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
     fireParameterChanged (changes);
   }
   
+  /** Gets the parameter descriptor for given key (for sub-class use).
+   * 
+   * @param key The key; must be non-{@code null} and in the {@link #keySet}.
+   * 
+   * @return The {@link ParameterDescriptor} for given key.
+   * 
+   * @throws IllegalArgumentException If the key is {@code null} or non-existent.
+   * 
+   */
+  protected final D getParameterDescriptor (final String key)
+  {
+    if (key == null || ! this.parameterDescriptorMap.containsKey (key))
+      throw new IllegalArgumentException ();
+    return this.parameterDescriptorMap.get (key);
+  }
+  
   @Override
   public Set<String> keySet ()
   {
@@ -319,7 +337,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
   }
 
   @Override
-  public P get (Object key)
+  public P get (final Object key)
   {
     synchronized (this.parameterMap)
     {
