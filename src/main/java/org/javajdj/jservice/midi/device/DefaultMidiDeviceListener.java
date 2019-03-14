@@ -20,20 +20,18 @@ import java.util.Map;
 
 /** A default {@link MidiDeviceListener}.
  *
- * @param <P> The parameter value (generic) type.
- * 
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  * 
  */
-public class DefaultMidiDeviceListener<P>
-  implements MidiDeviceListener<P>
+public class DefaultMidiDeviceListener
+  implements MidiDeviceListener
 {
 
   /** Does nothing.
    * 
    */
   @Override
-  public void notifyParameterChanged (final Map<String, P> changes)
+  public void notifyParameterChanged (final Map<String, Object> changes)
   {
   }
   
