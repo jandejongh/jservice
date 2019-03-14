@@ -23,14 +23,12 @@ import org.javajdj.jservice.midi.MidiService;
 
 /** Support for {@link MidiDeviceListener}s for the implementation of {@link MidiDevice}.
  *
- * @param <P> The parameter value (generic) type.
- * 
  * @see MidiDeviceListener
  * 
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  * 
  */
-public class MidiDeviceListenerSupport<P>
+public class MidiDeviceListenerSupport
 {
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,7 +110,7 @@ public class MidiDeviceListenerSupport<P>
    * @see MidiDeviceListener#notifyParameterChanged
    * 
    */
-  public final void fireParameterChanged (final Map<String, P> changes)
+  public final void fireParameterChanged (final Map<String, Object> changes)
   {
     final Set<MidiDeviceListener> listeners;
     synchronized (this.midiDeviceListenersLock)
