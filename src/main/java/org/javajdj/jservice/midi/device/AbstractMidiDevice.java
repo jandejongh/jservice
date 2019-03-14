@@ -27,6 +27,7 @@ import org.javajdj.jservice.Service;
 import org.javajdj.jservice.midi.DefaultMidiServiceListener;
 import org.javajdj.jservice.midi.MidiService;
 import org.javajdj.jservice.midi.MidiServiceListener;
+import org.javajdj.jservice.midi.MidiUtils;
 import org.javajdj.jservice.support.Service_FromMix;
 
 /** A partial implementation of a {@link MidiDevice}.
@@ -217,6 +218,28 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
     {
       if (getStatus () != Status.STOPPED && getMidiService () != null)
         getMidiService ().sendMidiSysEx (vendorId, rawMidiMessage);
+    }
+  }
+  
+  /** Sends a MIDI SysEx Identity Request message on the {@link MidiService}, destined to all devices (All Channel Broadcast).
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @see #getStatus
+   * @see MidiUtils#createMidiSysExMessage_IdentityRequest
+   * 
+   */
+  public final void sendMidiIdReq ()
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendRawMidiMessage (MidiUtils.createMidiSysExMessage_IdentityRequest ());
     }
   }
   
