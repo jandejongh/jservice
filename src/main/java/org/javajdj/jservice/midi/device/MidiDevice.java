@@ -25,7 +25,7 @@ import org.javajdj.jservice.Service;
  *
  * <p>
  * The device exposes a {@link Map} interface, mapping device-parameters {@link String}s
- * onto a user-supplied (generic) parameter value type.
+ * onto {@link Object}s of key-dependent types.
  * The key-set of the map is fixed and set upon construction of the {@link Object}.
  * Implementation must throw {@link UnsupportedOperationException}s in all destructive operations on the key set.
  * 
@@ -52,8 +52,6 @@ import org.javajdj.jservice.Service;
  * Implementations are encouraged to use {@link Status#ERROR} to indicate
  * lack of connectivity with the device.
  * 
- * @param <P> The parameter value (generic) type.
- * 
  * @see MidiDeviceListener
  * @see AbstractMidiDevice
  * @see MidiService
@@ -61,8 +59,8 @@ import org.javajdj.jservice.Service;
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  * 
  */
-public interface MidiDevice<P>
-  extends Service, Map<String, P>
+public interface MidiDevice
+  extends Service, Map<String, Object>
 {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +136,7 @@ public interface MidiDevice<P>
    * 
    */
   @Override
-  P get (Object key);
+  Object get (Object key);
 
   /** Sets the value of device parameter with given key.
    * 
@@ -153,7 +151,7 @@ public interface MidiDevice<P>
    * 
    */
   @Override
-  P put(String key, P value);
+  Object put(String key, Object value);
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
