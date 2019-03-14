@@ -383,7 +383,7 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
    * 
    */
   @Override
-  public final Object put (final String key, Object value)
+  public final Object put (final String key, final Object value)
   {
     if (key == null || ! this.parameterMap.containsKey (key))
       throw new IllegalArgumentException ();
