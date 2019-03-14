@@ -32,15 +32,14 @@ import org.javajdj.jservice.support.Service_FromMix;
 
 /** A partial implementation of a {@link MidiDevice}.
  *
- * @param <P> The parameter value (generic) type.
  * @param <D> The type used to describe parameters.
  * 
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  * 
  */
-public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
+public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   extends Service_FromMix
-  implements MidiDevice<P>
+  implements MidiDevice
 {
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +113,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
    * @see MidiDeviceListener#notifyParameterChanged
    * 
    */
-  protected final void fireParameterChanged (final Map<String, P> changes)
+  protected final void fireParameterChanged (final Map<String, Object> changes)
   {
     this.midiDeviceListenerSupport.fireParameterChanged (changes);
   }
@@ -249,7 +248,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  private final Map<String, P> parameterMap = new LinkedHashMap<> ();
+  private final Map<String, Object> parameterMap = new LinkedHashMap<> ();
   
   private final Map<String, D> parameterDescriptorMap = new HashMap<> ();
   
@@ -302,7 +301,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
    * @see #fireParameterChanged
    * 
    */
-  protected final void updateParameterFromDevice (final String key, final P value)
+  protected final void updateParameterFromDevice (final String key, Object value)
   {
     if (key == null || value == null || ! this.parameterMap.containsKey (key))
       throw new IllegalArgumentException ();
@@ -324,7 +323,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
    * @see #fireParameterChanged
    * 
    */
-  protected final void updateParameterFromDevice (final Map<String, P> changes)
+  protected final void updateParameterFromDevice (final Map<String, Object> changes)
   {
     if (changes == null || changes.containsKey (null))
       throw new IllegalArgumentException ();
@@ -360,7 +359,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
   }
 
   @Override
-  public P get (final Object key)
+  public Object get (final Object key)
   {
     synchronized (this.parameterMap)
     {
@@ -384,7 +383,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
    * 
    */
   @Override
-  public final P put (final String key, final P value)
+  public final Object put (final String key, Object value)
   {
     if (key == null || ! this.parameterMap.containsKey (key))
       throw new IllegalArgumentException ();
@@ -403,7 +402,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
    * @see #put
    * 
    */
-  protected abstract P putImpl (final String key, final P value);
+  protected abstract Object putImpl (final String key, final Object value);
   
   @Override
   public final int size ()
@@ -441,7 +440,7 @@ public abstract class AbstractMidiDevice<P, D extends ParameterDescriptor>
    * 
    */
   @Override
-  public final P remove (final Object o)
+  public final byte[] remove (final Object o)
   {
     throw new UnsupportedOperationException ();
   }
