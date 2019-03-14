@@ -20,13 +20,11 @@ import java.util.Map;
 
 /** A listener to (parameter-value) changes of a {@link MidiDevice}.
  *
- * @param <P> The parameter value (generic) type.
- * 
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  * 
  */
 @FunctionalInterface
-public interface MidiDeviceListener<P>
+public interface MidiDeviceListener
 {
   
   /** Notification of a parameter change.
@@ -35,6 +33,6 @@ public interface MidiDeviceListener<P>
    *                mapped onto their new values (non-{@code null}).
    * 
    */
-  void notifyParameterChanged (Map<String, P> changes);
+  void notifyParameterChanged (Map<String, Object> changes);
   
 }
