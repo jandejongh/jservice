@@ -120,6 +120,67 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // MIDI CHANNEL
+  // MIDI RX OMNI
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public final static String MIDI_CHANNEL_PROPERTY_NAME = "midiChannel";
+  
+  private volatile int midiChannel = 1; // Note: int read/writes are atomic.
+  
+  private final Object midiChannelLock = new Object ();
+  
+  @Override
+  public final int getMidiChannel ()
+  {
+    return this.midiChannel;
+  }
+  
+  @Override
+  public final void setMidiChannel (final int midiChannel)
+  {
+    if (midiChannel < 1 || midiChannel > 16)
+      throw new IllegalArgumentException ();
+    synchronized (this.midiChannelLock)
+    {
+      if (midiChannel != this.midiChannel)
+      {
+        final int oldMidiChannel = this.midiChannel;
+        this.midiChannel = midiChannel;
+        fireSettingsChanged (MIDI_CHANNEL_PROPERTY_NAME, oldMidiChannel, this.midiChannel);
+      }
+    }
+  }
+
+  public final static String MIDI_RX_OMNI_PROPERTY_NAME = "midiRxOmni";
+  
+  private volatile boolean midiRxOmni = true; // Note: boolean read/writes are atomic.
+  
+  private final Object midiRxOmniLock = new Object ();
+  
+  @Override
+  public final boolean isMidiRxOmni ()
+  {
+    return this.midiRxOmni;
+  }
+
+  @Override
+  public final void setMidiRxOmni (final boolean midiRxOmni)
+  {
+    synchronized (this.midiRxOmniLock)
+    {
+      if (midiRxOmni != this.midiRxOmni)
+      {
+        final boolean oldMidiRxOmni = this.midiRxOmni;
+        this.midiRxOmni = midiRxOmni;
+        fireSettingsChanged (MIDI_RX_OMNI_PROPERTY_NAME, oldMidiRxOmni, this.midiRxOmni);
+      }
+    }
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // MIDI SERVICE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -483,28 +544,37 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   private final MidiServiceListener midiServiceListener = new DefaultMidiServiceListener ()
   {
     
+    // There are admitted race conditions in the code below if multiple Threads set the MIDI channel and/or the Rx OMNI setting.
+    // However, the worst that can happen is that some messages will not be delivered.
+    // This is risk worth taking instead of making the locking too tight and risking deadlocks.
+    // Or bothering the MidiService performance-wise with our lock contentions.
+    
     @Override
     public void midiRxNoteOff (final int midiChannel, final int note, final int velocity)
     {
-      AbstractMidiDevice.this.onMidiRxNoteOff (midiChannel, note, velocity);
+      if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
+        AbstractMidiDevice.this.onMidiRxNoteOff (midiChannel, note, velocity);
     }
     
     @Override
     public void midiRxNoteOn (final int midiChannel, final int note, final int velocity)
     {
-      AbstractMidiDevice.this.onMidiRxNoteOn (midiChannel, note, velocity);
+      if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
+        AbstractMidiDevice.this.onMidiRxNoteOn (midiChannel, note, velocity);
     }
 
     @Override
     public void midiRxProgramChange (final int midiChannel, final int patch)
     {
-      AbstractMidiDevice.this.onMidiRxProgramChange (midiChannel, patch);
+      if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
+        AbstractMidiDevice.this.onMidiRxProgramChange (midiChannel, patch);
     }
 
     @Override
     public void midiRxControlChange (final int midiChannel, final int controller, final int value)
     {
-      AbstractMidiDevice.this.onMidiRxControlChange (midiChannel, controller, value);
+      if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
+        AbstractMidiDevice.this.onMidiRxControlChange (midiChannel, controller, value);
     }
 
     @Override

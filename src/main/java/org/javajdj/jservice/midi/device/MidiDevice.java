@@ -105,6 +105,68 @@ public interface MidiDevice
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // MIDI CHANNEL
+  // MIDI RX OMNI
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Returns the MIDI channel used for transmission of "regular" MIDI messages (to the actual device).
+   * 
+   * <p>
+   * Unless the {@code midiRxOmni} property is {@code true},
+   * the MIDI channel is also used for filtering messages from the {@link MidiService}.
+   * 
+   * <p>
+   * MIDI channels are between unity and 16 inclusive.
+   * 
+   * @return The MIDI channel used for transmission of "regular" MIDI messages to the device
+   *           (and for reception filtering is {@code midiRxOmni == false}.
+   * 
+   * @see #isMidiRxOmni
+   * 
+   */
+  int getMidiChannel ();
+  
+  /** Sets the MIDI channel used for transmission of "regular" MIDI messages (to the actual device).
+   * 
+   * <p>
+   * Unless the {@code midiRxOmni} property is {@code true},
+   * the MIDI channel is also used for filtering messages from the {@link MidiService}.
+   * 
+   * <p>
+   * MIDI channels are between unity and 16 inclusive.
+   * 
+   * @param midiChannel The new MIDI channel used for transmission of "regular" MIDI messages to the device
+   *                      (and for reception filtering is {@code midiRxOmni == false}.
+   * 
+   * @throws IllegalArgumentException If the channel is out of range; MIDI channels are between unity and 16 inclusive.
+   * 
+   * @see #isMidiRxOmni
+   * 
+   */
+  void setMidiChannel (int midiChannel);
+  
+  /** Returns whether the device object listens on all MIDI channels for messages from the actual device.
+   * 
+   * @return Whether the device object listens on all MIDI channels for messages from the actual device.
+   * 
+   * @see #getMidiChannel
+   * 
+   */
+  boolean isMidiRxOmni ();
+  
+  /** Sets whether the device object listens on all MIDI channels for messages from the actual device.
+   * 
+   * @param midiRxOmni Whether from now on the device object listens on all MIDI channels ({@code true})
+   *                     for messages from the device.
+   * 
+   * @see #setMidiChannel
+   * 
+   */
+  void setMidiRxOmni (boolean midiRxOmni);
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // MIDI DEVICE PARAMETER MAP
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
