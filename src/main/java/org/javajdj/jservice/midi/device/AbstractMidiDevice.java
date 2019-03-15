@@ -449,6 +449,8 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     if (key == null || ! this.parameterMap.containsKey (key))
       throw new IllegalArgumentException ();
     // XXX Shouldn't we compare with the current value.
+    // XXX Where do we set the value??? -> updateFromDevice!!
+    // This is really an asynchonous Map!
     return putImpl (key, value);
   }
 
@@ -506,10 +508,34 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     throw new UnsupportedOperationException ();
   }
 
+  /** Applies (puts) the entries in the provided map in sequence to this map.
+   * 
+   * <p>
+   * The implementation does not maintain any lock in between the successive invocations of {@link #put}.
+   * 
+   * @param map The map; keys must be non-{@code null} {@link String}s present in {@link #keySet};
+   *                     values must be non-{@code null} and of the proper type.
+   * 
+   * @throws NullPointerException     If {@code map} is {@code null} or has at least one {@code null} key <i>or</i> value.
+   * @throws IllegalArgumentException If an attempt is made to augment the present key {@code Set}.
+   * @throws ClassCastException       If any key is not a {@link String} or any value is of illegal type
+   *                                    (endorsed by sub-class).
+   * 
+   * @see #put
+   * @see #keySet
+   * 
+   */
   @Override
-  public void putAll (Map map)
+  public final void putAll (final Map map)
   {
-    throw new UnsupportedOperationException ("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    // Implementation assumes the argument does NOT change until return.
+    // This follows the Map contract.
+    if (map == null || map.containsKey (null) || map.containsValue (null))
+      throw new NullPointerException ();
+    if (! this.parameterMap.keySet ().containsAll (map.keySet ()))
+      throw new IllegalArgumentException ();
+    for (final Map.Entry entry : (Set<Map.Entry>) map.entrySet ()) /* XXX For HEAVEN'S SAKE: WHY DO I NEED THE CAST HERE??? */
+      put ((String) entry.getKey (), entry.getValue ());
   }
 
   /** Throws {@link UnsupportedOperationException}.
@@ -526,7 +552,7 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   @Override
   public Collection values ()
   {
-    throw new UnsupportedOperationException ("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return Collections.unmodifiableCollection (this.parameterMap.values ());
   }
 
   @Override
@@ -545,6 +571,7 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   {
     
     // There are admitted race conditions in the code below if multiple Threads set the MIDI channel and/or the Rx OMNI setting.
+    // Or, play with our Status for that matter.
     // However, the worst that can happen is that some messages will not be delivered.
     // This is risk worth taking instead of making the locking too tight and risking deadlocks.
     // Or bothering the MidiService performance-wise with our lock contentions.
@@ -552,6 +579,8 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     @Override
     public void midiRxNoteOff (final int midiChannel, final int note, final int velocity)
     {
+      if (getStatus () == Status.STOPPED)
+        return;
       if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
         AbstractMidiDevice.this.onMidiRxNoteOff (midiChannel, note, velocity);
     }
@@ -559,6 +588,8 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     @Override
     public void midiRxNoteOn (final int midiChannel, final int note, final int velocity)
     {
+      if (getStatus () == Status.STOPPED)
+        return;
       if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
         AbstractMidiDevice.this.onMidiRxNoteOn (midiChannel, note, velocity);
     }
@@ -566,6 +597,8 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     @Override
     public void midiRxProgramChange (final int midiChannel, final int patch)
     {
+      if (getStatus () == Status.STOPPED)
+        return;
       if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
         AbstractMidiDevice.this.onMidiRxProgramChange (midiChannel, patch);
     }
@@ -573,6 +606,8 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     @Override
     public void midiRxControlChange (final int midiChannel, final int controller, final int value)
     {
+      if (getStatus () == Status.STOPPED)
+        return;
       if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
         AbstractMidiDevice.this.onMidiRxControlChange (midiChannel, controller, value);
     }
@@ -580,6 +615,8 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     @Override
     public void midiRxSysEx (final byte vendorId, final byte[] rawMidiMessage)
     {
+      if (getStatus () == Status.STOPPED)
+        return;
       AbstractMidiDevice.this.onMidiRxSysEx (vendorId, rawMidiMessage);
     }
     
