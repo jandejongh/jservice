@@ -21,12 +21,10 @@ import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComboBox;
@@ -40,13 +38,11 @@ import org.javajdj.jservice.ServiceSupport;
 import org.javajdj.jservice.midi.raw.RawMidiService;
 import org.javajdj.jservice.midi.raw.RawMidiServiceListenerSupport;
 import org.javajdj.jservice.midi.raw.RawMidiService_NetUdpMulticast;
-import org.javajdj.swing.JColorCheckBox;
 import org.javajdj.jservice.Service;
 import org.javajdj.jservice.activity.ActivityMonitor;
 import org.javajdj.jservice.activity.DefaultActivityMonitor;
 import org.javajdj.jservice.activity.swing.JActivityMonitor;
 import org.javajdj.jservice.swing.JServiceControl;
-import org.javajdj.swing.DefaultMouseListener;
 
 /** A {@link JComponent} that implements a {@link RawMidiService}, either user-supplied
  *  or through selection and booting of such a service among supported types.
@@ -95,23 +91,14 @@ public class JRawMidiService
     add (new JLabel ("MIDI Enabled"));
     if (this.customRawMidiService == null)
     {
-      final Map<Boolean, Color> colorMap = new HashMap<>();
-      colorMap.put (false, null);
-      colorMap.put (true, Color.red);
-      this.jMidiEnabled = new JColorCheckBox.JBoolean (colorMap);
-      this.jMidiEnabled.setDisplayedValue (false);
-      addStatusListener (this.ownStatusListener);    
-      this.jMidiEnabled.addMouseListener (new JMIDIEnabledMouseListener ());
+      // XXX NEED TO BE ABLE TO ACCEPT A CUSTOM COLOR FUNCTION XXX TODO
+      this.jMidiEnabled = new JServiceControl (this, JRawMidiService.DEFAULT_STATUS_COLOR_FUNCTION);
       add (this.jMidiEnabled);
     }
     else
     {
       this.jMidiEnabled = null;
-      final Map<Service.Status, Color> colorMap = new HashMap<>();
-      colorMap.put (Status.STOPPED, null);
-      colorMap.put (Status.ACTIVE, Color.green);
-      colorMap.put (Status.ERROR, Color.red);
-      add (new JServiceControl (this.customRawMidiService, colorMap));
+      add (new JServiceControl (this.customRawMidiService, JRawMidiService.DEFAULT_STATUS_COLOR_FUNCTION));
     }
     if (this.customRawMidiService == null)
     {
@@ -163,6 +150,37 @@ public class JRawMidiService
     this (null);
   }
   
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // DEFAULT STATUS COLOR FUNCTION
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** The default color function for the service status of {@link JRawMidiService}.
+   * 
+   * <p>
+   * The default coloring is none for {@link Service.Status#STOPPED},
+   * {@link Color#red} for {@link Service.Status#ACTIVE},
+   * and {@link Color#orange} for {@link Service.Status#ERROR}.
+   * 
+   */
+  public final static Function<Service.Status, Color> DEFAULT_STATUS_COLOR_FUNCTION = (final Service.Status t) ->
+  {
+    if (t == null)
+      return null;
+    switch (t)
+    {
+      case STOPPED:
+        return null;
+      case ACTIVE:
+        return java.awt.Color.red;
+      case ERROR:
+        return java.awt.Color.orange;
+      default:
+        throw new RuntimeException ();
+    }
+  };
+
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
   // toString
@@ -429,42 +447,7 @@ public class JRawMidiService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private final JColorCheckBox.JBoolean jMidiEnabled;
-  
-  private class JMIDIEnabledMouseListener
-    extends DefaultMouseListener
-  {
-    
-      @Override
-      public final void mouseClicked (final MouseEvent e)
-      {
-        JRawMidiService.this.toggleService ();
-      }
-
-  }
-  
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //
-  // OWN STATUS LISTENER
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  private final StatusListener ownStatusListener = new StatusListener ()
-  {
-    @Override
-    public void onStatusChange (Service service, Status oldStatus, Status newStatus)
-    {
-      if (! SwingUtilities.isEventDispatchThread ())
-      {
-        SwingUtilities.invokeLater (() -> onStatusChange (service, oldStatus, newStatus));
-        return;
-      }
-      // Now on Swing EDT.
-      // Note that the jMidiEnabled component is not used with a custom raw MIDI service (it is null then).
-      if (JRawMidiService.this.jMidiEnabled != null)
-        JRawMidiService.this.jMidiEnabled.setDisplayedValue (newStatus == Status.ACTIVE);
-    }
-  };
+  private final JServiceControl jMidiEnabled;
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
