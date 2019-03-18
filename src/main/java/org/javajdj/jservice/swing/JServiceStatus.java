@@ -19,7 +19,6 @@ package org.javajdj.jservice.swing;
 import java.awt.Color;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
 import org.javajdj.jservice.Service;
