@@ -16,6 +16,7 @@
  */
 package org.javajdj.jservice.swing;
 
+import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Map;
@@ -55,13 +56,13 @@ public class JServiceControl
    * @see JColorCheckBox
    * 
    */
-  public JServiceControl (final Service service, final Function<Service.Status, java.awt.Color> colorFunction)
+  public JServiceControl (final Service service, final Function<Service.Status, Color> colorFunction)
   {
     super (service, colorFunction);
     addMouseListener (this.mouseListener);
   }
 
-  /** Creates a service-control component for given service with given color function.
+  /** Creates a service-control component for given service with given color map.
    * 
    * <p>
    * If the map returns a {@code null} value for some key,
@@ -76,7 +77,7 @@ public class JServiceControl
    * @see JColorCheckBox
    * 
    */
-  public JServiceControl (final Service service, Map<Service.Status, java.awt.Color> colorMap)
+  public JServiceControl (final Service service, Map<Service.Status, Color> colorMap)
   {
     super (service, colorMap);
     addMouseListener (this.mouseListener);
@@ -110,7 +111,7 @@ public class JServiceControl
   private final MouseListener mouseListener = new DefaultMouseListener ()
   {
     @Override
-    public final void mouseClicked (MouseEvent e)
+    public final void mouseClicked (final MouseEvent e)
     {
       JServiceControl.this.getService ().toggleService ();
     }
