@@ -71,6 +71,7 @@ public class JActivityMonitor
     this.activity = activity;
     if (this.activityMonitor != null)
       this.activityMonitor.addStatusListener (this.activityMonitorListener);
+    setEnabled (false);
     updateActivityStatus ();
   }
   
