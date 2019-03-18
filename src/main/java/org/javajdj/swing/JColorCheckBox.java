@@ -19,13 +19,13 @@ package org.javajdj.swing;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
@@ -38,7 +38,15 @@ import javax.swing.table.TableCellRenderer;
  * <p>
  * The component inherits behavior from {@link JCheckBox},
  * yet uses the {@code icon} property internally.
- * Upon construction, the {@code selected} and {@code enabled} properties are set to {@code false}.
+ * Upon construction, the {@code selected} property is set to {@code false}
+ * on the super-class.
+ * Also, the code ensures (hacks) that {@code selected == false},
+ * inhibiting the check mark from appearing.
+ * 
+ * <p>
+ * The same applies to the {@code icon} property,
+ * since it is used internally by this class.
+ * Attempts to modify the {@code icon} property will result in an {@link UnsupportedOperationException}.
  * 
  * <p>
  * The {@code class} features constructor providing a {@link Map}
@@ -66,7 +74,7 @@ public class JColorCheckBox<E>
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   /** Constructs a {@link JColorCheckBox}
-   *  taking a {@link Function} for mapping values (to represent) onto {@link java.awt.Color}s.
+   *  taking a {@link Function} for mapping values (to represent) onto {@link Color}s.
    * 
    * <p>
    * If the function returns a {@code null} value,
@@ -76,17 +84,34 @@ public class JColorCheckBox<E>
    * @param colorFunction The function; may be {@code null}.
    * 
    */
-  public JColorCheckBox (final Function<E, java.awt.Color> colorFunction)
+  public JColorCheckBox (final Function<E, Color> colorFunction)
   {
     super ();
     this.colorFunction = colorFunction;
-    setSelected (false);
-    setEnabled (false);
-    setIcon (new ColorCheckBoxIcon ());
+    super.setSelected (false);
+    // super.setEnabled (false);
+    final Icon icon = new ColorCheckBoxIcon ();
+    super.setIcon (icon);
+    super.setPressedIcon (icon);
+    super.setDisabledSelectedIcon (icon);
+    super.setDisabledIcon (icon);
+    // XXX This does not seem to work to remove the 'selected' check mark...
+    super.setSelectedIcon (icon);
+    // Ugly hack to get rid of the check mark...
+    // It seems to work, BUT: XXX
+    // This class has become way too complicated for its purpose...
+    addMouseListener (new DefaultMouseListener ()
+    {
+      @Override
+      public final void mouseClicked (final MouseEvent e)
+      {
+        JColorCheckBox.this.setSelected (false);
+      }
+    });
   }
   
   /** Constructs a {@link JColorCheckBox}
-   *  taking a {@link Map} for mapping values (to represent) onto {@link java.awt.Color}s.
+   *  taking a {@link Map} for mapping values (to represent) onto {@link Color}s.
    * 
    * <p>
    * If the map returns a {@code null} value for some key,
@@ -96,7 +121,7 @@ public class JColorCheckBox<E>
    * @param colorMap The map; may be {@code null}.
    * 
    */
-  public JColorCheckBox (final Map<E, java.awt.Color> colorMap)
+  public JColorCheckBox (final Map<E, Color> colorMap)
   {
     this ((E e) -> (colorMap != null ? colorMap.get (e) : null));
   }
@@ -107,7 +132,20 @@ public class JColorCheckBox<E>
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private final Function<E, java.awt.Color> colorFunction;
+  private final Function<E, Color> colorFunction;
+  
+  /** Returns the color function (mapping values onto {@link Color}s.
+   * 
+   * <p>
+   * A color function must be immutable (with respect to the {@link Function} interface).
+   * 
+   * @return The color function, may be {@code null}.
+   * 
+   */
+  public final Function<E, Color> getColorFunction ()
+  {
+    return this.colorFunction;
+  }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -139,11 +177,12 @@ public class JColorCheckBox<E>
     if (repaint)
     {
       // Tell Swing EDT to redraw this component.
-      final Runnable r = () ->  JColorCheckBox.this.repaint ();
-      if (SwingUtilities.isEventDispatchThread ())
-        r.run ();
-      else
-        SwingUtilities.invokeLater (r);
+      SwingUtilsJdJ.invokeOnSwingEDT (() -> 
+      {
+        JColorCheckBox.this.repaint ();
+//        JColorCheckBox.this.invalidate ();
+//        JColorCheckBox.this.revalidate ();
+      });
     }
   }
   
@@ -152,9 +191,114 @@ public class JColorCheckBox<E>
    * @param displayedValue The new value; may be {@code null}.
    * 
    */
-  public final synchronized void setDisplayedValue (final E displayedValue)
+  public final void setDisplayedValue (final E displayedValue)
   {
     setDisplayedValue (displayedValue, true);
+  }
+ 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // ENABLED
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+//  private volatile boolean enabled = true;
+//  
+//  /** Returns whether this component is enabled.
+//   * 
+//   * <p>
+//   * This method returns its private notion of the {@code enabled} property;
+//   * it is always {@code false} on the super-class.
+//   * The default value is {@code true}.
+//   * 
+//   * @return Whether this component is enabled.
+//   * 
+//   * @throws UnsupportedOperationException If called from another {@link Thread} that the Swing EDT.
+//   * 
+//   * @see SwingUtilities#isEventDispatchThread
+//   * 
+//   */
+//  @Override
+//  public final boolean isEnabled ()
+//  {
+//    if (! SwingUtilities.isEventDispatchThread ())
+//      throw new UnsupportedOperationException ();
+//    return this.enabled;
+//  }
+//  
+//  /** Sets whether this component is enabled.
+//   * 
+//   * <p>
+//   * This method holds its private notion of the {@code enabled} property;
+//   * it is always {@code false} on the super-class.
+//   * The default value is {@code true}.
+//   * 
+//   * @param enabled Whether or not the component is enabled from this point.
+//   * 
+//   * @throws UnsupportedOperationException If called from another {@link Thread} that the Swing EDT.
+//   * 
+//   * @see SwingUtilities#isEventDispatchThread
+//   * 
+//   */
+//  @Override
+//  public final void setEnabled (final boolean enabled)
+//  {
+//    if (! SwingUtilities.isEventDispatchThread ())
+//      throw new UnsupportedOperationException ();
+//    if (enabled != this.enabled)
+//    {
+//      this.enabled = enabled;
+//      repaint ();
+//    }
+//  }
+//  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // SELECTED
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Returns {@code false}.
+   * 
+   * @return {@code false}.
+   * 
+   */
+  @Override
+  public final boolean isSelected ()
+  {
+    return false;
+  }
+  
+//  /** Throws an exception.
+//   * 
+//   * @param selected The new selected status of the component.
+//   * 
+//   * @throws UnsupportedOperationException Always.
+//   * 
+//   */
+//  @Override
+//  public void setSelected (final boolean selected)
+//  {
+//    throw new UnsupportedOperationException ();
+//  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // ICON
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Throws an exception.
+   * 
+   * @param icon The new icon.
+   * 
+   * @throws UnsupportedOperationException Always.
+   * 
+   */
+  @Override
+  public final void setIcon (final Icon icon)
+  {
+    throw new UnsupportedOperationException ();
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +330,7 @@ public class JColorCheckBox<E>
     public void paintIcon (final Component c, final Graphics g, final int x, final int y)
     {
       this.wrappedIcon.paintIcon (c, g, x, y);
-      if (JColorCheckBox.this.colorFunction != null)
+      if (/* JColorCheckBox.this.isEnabled () && */ JColorCheckBox.this.colorFunction != null)
       {
         final E value = JColorCheckBox.this.displayedValue;
         final java.awt.Color fillColor = JColorCheckBox.this.colorFunction.apply (value);
@@ -231,32 +375,32 @@ public class JColorCheckBox<E>
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   /** A ready-to-go {@link JColorCheckBox} for {@link java.lang.Boolean}.
+   /** A ready-to-go {@link JColorCheckBox} for {@link Boolean}.
     * 
     * <p>
-    * The default color scheme uses {@link java.awt.Color#red} and {@link java.awt.Color#green},
+    * The default color scheme uses {@link Color#red} and {@link Color#green},
     * but this can be overridden through an alternative constructor.
     * 
     * @author Jan de Jongh, TNO
     * 
     */
   public static class JBoolean
-    extends JColorCheckBox<java.lang.Boolean>
+    extends JColorCheckBox<Boolean>
   {
     
-    /** Maps {@link java.lang.Boolean} values onto {@link Color}.
+    /** Maps {@link Boolean} values onto {@link Color}.
      * 
      * <p>
      * A static initializer block map {@link java.lang.Boolean#FALSE} onto {@link java.awt.Color#red}
      * and {@link java.lang.Boolean#TRUE} onto {@link java.awt.Color#green}.
      * 
      */
-    public final static Map<java.lang.Boolean, java.awt.Color> DEFAULT_BOOLEAN_COLOR_MAP = new HashMap<> ();
+    public final static Map<Boolean, Color> DEFAULT_BOOLEAN_COLOR_MAP = new HashMap<> ();
     
     static
     {
-      DEFAULT_BOOLEAN_COLOR_MAP.put (java.lang.Boolean.FALSE, java.awt.Color.red);
-      DEFAULT_BOOLEAN_COLOR_MAP.put (java.lang.Boolean.TRUE, java.awt.Color.green);
+      DEFAULT_BOOLEAN_COLOR_MAP.put (Boolean.FALSE, Color.red);
+      DEFAULT_BOOLEAN_COLOR_MAP.put (Boolean.TRUE,  Color.green);
     }
       
     /** Creates a check-box for a boolean value with given color function.
@@ -264,7 +408,7 @@ public class JColorCheckBox<E>
      * @param colorFunction The color function.
      * 
      */
-    public JBoolean (Function<java.lang.Boolean, java.awt.Color> colorFunction)
+    public JBoolean (Function<Boolean, Color> colorFunction)
     {
       super (colorFunction);
     }
@@ -274,7 +418,7 @@ public class JColorCheckBox<E>
      * @param colorMap The color map.
      * 
      */
-    public JBoolean (Map<java.lang.Boolean, java.awt.Color> colorMap)
+    public JBoolean (Map<Boolean, Color> colorMap)
     {
       super (colorMap);
     }
@@ -282,8 +426,8 @@ public class JColorCheckBox<E>
     /** Creates a check-box for a boolean value with default color scheme.
      * 
      * <p>
-     * The default color scheme is to display {@code false} with {@link java.awt.Color#RED},
-     * {@code true} with {@link java.awt.Color#GREEN}.
+     * The default color scheme is to display {@code false} with {@link Color#RED},
+     * {@code true} with {@link Color#GREEN}.
      * 
      */
     public JBoolean ()
@@ -299,17 +443,17 @@ public class JColorCheckBox<E>
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   /** A ready-to-go {@link JColorCheckBox} for {@link java.awt.Color}.
+   /** A ready-to-go {@link JColorCheckBox} for {@link Color}.
     * 
     * <p>
-    * The implementation uses the identify function to map {@link java.awt.Color} values
+    * The implementation uses the identify function to map {@link Color} values
     * into their implementation.
     * 
     * @author Jan de Jongh, TNO
     * 
     */
   public static class JColor
-    extends JColorCheckBox<java.awt.Color>
+    extends JColorCheckBox<Color>
   {
     
     public JColor ()
