@@ -16,12 +16,16 @@
  */
 package org.javajdj.jservice.midi.device;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.javajdj.jservice.Service;
 import org.javajdj.jservice.midi.DefaultMidiServiceListener;
@@ -29,6 +33,7 @@ import org.javajdj.jservice.midi.MidiService;
 import org.javajdj.jservice.midi.MidiServiceListener;
 import org.javajdj.jservice.midi.MidiUtils;
 import org.javajdj.jservice.support.Service_FromMix;
+import org.javajdj.util.equals.EqualsUtils;
 
 /** A partial implementation of a {@link MidiDevice}.
  *
@@ -67,6 +72,7 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     // XXX For now, midiService is fixed and non-null...
     if (midiService == null)
       throw new IllegalArgumentException ();
+    addRunnable (this.valueJanitor);
     this.midiService = midiService;
     this.midiService.addMidiServiceListener (this.midiServiceListener);
   }
@@ -352,35 +358,67 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     }
   }
   
-  /** Updates a (single) device parameter (for sub-class use only) by virtue of a change on the device.
+  /** Updates a (single) device parameter (for sub-class use only) by virtue of a possible change on the device.
+   * 
+   * <p>
+   * This method compares the new value with the internally stored one,
+   * and ignores updates with equal values.
+   * (For array comparison, which is Broken As Design in Java,
+   * the dedicated method {@link EqualsUtils#equals}
+   * is used instead of {@link Object#equals}.)
    * 
    * @param key   The parameter name.
-   * @param value The new value, may be {@code null}.
+   * @param value The new value, may not be {@code null}.
    * 
-   * @throws IllegalArgumentException If the key is {@code null} or not registered.
+   * @throws IllegalArgumentException If the key is {@code null} or not registered, or if the value is {@code null}.
+   * @throws ClassCastException       If the value is of illegal type.
    * 
+   * @see #invalidateParameterFromDevice(java.lang.String)
    * @see #fireParameterChanged
    * 
    */
-  protected final void updateParameterFromDevice (final String key, Object value)
+  protected final void updateParameterFromDevice (final String key, final Object value)
   {
     if (key == null || value == null || ! this.parameterMap.containsKey (key))
       throw new IllegalArgumentException ();
+    final boolean changed;
     synchronized (this.parameterMap)
     {
-      this.parameterMap.put (key, value);
+      this.lastUpdateMap.put (key, Instant.now ());
+      final Object oldValue = this.parameterMap.get (key);
+      changed = ! EqualsUtils.equals (oldValue, value);
+      //  LOG.log (Level.INFO, "Key={0}: old={1}; new={2}: changed={3}.", new Object[]{key, oldValue, value, changed});
+      if (changed)
+        this.parameterMap.put (key, value);
     }
-    fireParameterChanged (Collections.singletonMap (key, value));
+    if (changed)
+      fireParameterChanged (Collections.singletonMap (key, value));
   }
   
-  /** Updates a device parameter (for sub-class use only) by virtue of a change on the device.
+  /** Updates multiple device parameters (for sub-class use only) by virtue of a possible change on the device.
+   * 
+   * <p>
+   * This method iterates over the changes in an atomic way by locking the internally
+   * held parameter map.
+   * It notifies listeners of any real changes (if at all) <i>outside</i>
+   * that {@code synchronized} block
+   * through a single {@link #fireParameterChanged(java.util.Map)}.
+   * 
+   * <p>
+   * This method compares the new value with the internally stored one,
+   * and ignores updates with equal values.
+   * (For array comparison, which is Broken As Design in Java,
+   * the dedicated method {@link EqualsUtils#equals}
+   * is used instead of {@link Object#equals}.)
    * 
    * @param changes A non-{@code null} {@link Map} holding the names of the parameters that have changed,
-   *                mapped onto their new values (which may be {@code null}).
+   *                mapped onto their new values (which may not be {@code null}).
    * 
    * @throws IllegalArgumentException If {@code changes == null}
-   *                                  or any key in {@code changes} is {@code null} or not registered.
+   *                                  any key in {@code changes} is {@code null} or not registered,
+   *                                  or if {@code changes} holds a {@code null} value.
    * 
+   * @see #invalidateParameterFromDevice(java.util.Set)
    * @see #fireParameterChanged
    * 
    */
@@ -390,11 +428,105 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
       throw new IllegalArgumentException ();
     if (! this.parameterMap.keySet ().containsAll (changes.keySet ()))
       throw new IllegalArgumentException ();
+    if (changes.containsValue (null))
+      throw new IllegalArgumentException ();
+    Map<String, Object> realChanges = null;
     synchronized (this.parameterMap)
     {
-      this.parameterMap.putAll (changes);
+      for (final Map.Entry<String, Object> entry : changes.entrySet ())
+      {
+        final String key = entry.getKey ();
+        this.lastUpdateMap.put (key, Instant.now ());
+        final Object oldValue = this.parameterMap.get (key);
+        final Object value = changes.get (key);
+        final boolean changed = ! EqualsUtils.equals (oldValue, value);
+        // LOG.log (Level.INFO, "Key={0}: old={1}; new={2}: changed={3}.", new Object[]{key, oldValue, value, changed});
+        if (changed)
+        {           
+          this.parameterMap.put (key, value);
+          if (realChanges == null)
+            realChanges = new LinkedHashMap<> ();
+          realChanges.put (key, value);
+        }
+      }
     }
-    fireParameterChanged (changes);
+    if (realChanges != null)
+      fireParameterChanged (realChanges);      
+  }
+  
+  /** Invalidates (sets to {@code null} value) a (single) device parameter (for sub-class use only)
+   *  by virtue of an update time-out.
+   * 
+   * <p>
+   * With respect to the implementation, similar comments apply as with
+   * {@link #updateParameterFromDevice(java.lang.String, java.lang.Object)},
+   * except that the new value is {@code null}.
+   * 
+   * @param key The name (key) of the parameter to invalidate.
+   * 
+   * @throws IllegalArgumentException If the key is {@code null} or not registered.
+   * 
+   * @see #keySet
+   * @see #fireParameterChanged
+   * 
+   */
+  protected final void invalidateParameterFromDevice (final String key)
+  {
+    if (key == null || ! this.parameterMap.containsKey (key))
+      throw new IllegalArgumentException ();
+    final boolean changed;
+    synchronized (this.parameterMap)
+    {
+      this.lastUpdateMap.put (key, Instant.now ());
+      final Object oldValue = this.parameterMap.get (key);
+      changed = oldValue != null;
+      if (changed)
+        this.parameterMap.put (key, null);
+    }
+    if (changed)
+      fireParameterChanged (Collections.singletonMap (key, null));
+  }
+  
+  /** Invalidates (sets to {@code null} values) multiple device parameters (for sub-class use only)
+   *  by virtue of an update time-out.
+   * 
+   * <p>
+   * With respect to the implementation, similar comments apply as with
+   * {@link #updateParameterFromDevice(java.util.Map)},
+   * except that the new values are {@code null}.
+   * 
+   * @param keys The names (keys) of the parameter to invalidate.
+   * 
+   * @throws IllegalArgumentException If {@code keys == null}, or {@code keys} contains {@code null} or an unregistered
+   *                                    parameter name.
+   * 
+   * @see #keySet
+   * @see #fireParameterChanged
+   * 
+   */
+  protected final void invalidateParameterFromDevice (final Set<String> keys)
+  {
+    if (keys == null || keys.contains (null) || ! this.parameterMap.keySet ().containsAll (keys))
+      throw new IllegalArgumentException ();
+    Map<String, Object> realChanges = null;
+    synchronized (this.parameterMap)
+    {
+      for (final String key : keys)
+      {
+        this.lastUpdateMap.put (key, Instant.now ());
+        final Object oldValue = this.parameterMap.get (key);
+        final boolean changed = oldValue != null;
+        if (changed)
+        {           
+          this.parameterMap.put (key, null);
+          if (realChanges == null)
+            realChanges = new LinkedHashMap<> ();
+          realChanges.put (key, null);
+        }
+      }
+    }
+    if (realChanges != null)
+      fireParameterChanged (realChanges);      
   }
   
   /** Gets the parameter descriptor for given key (for sub-class use).
@@ -448,8 +580,6 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   {
     if (key == null || ! this.parameterMap.containsKey (key))
       throw new IllegalArgumentException ();
-    // XXX Shouldn't we compare with the current value.
-    // XXX Where do we set the value??? -> updateFromDevice!!
     // This is really an asynchonous Map!
     return putImpl (key, value);
   }
@@ -694,6 +824,69 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   protected void onMidiRxSysEx (final byte vendorId, final byte[] rawMidiMessage)
   {  
   }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // VALUE JANITOR
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // XXX Add getters/setters...
+  // XXX Add to MidiDevice interface?
+  private final long VALUE_JANITOR_PERIOD_MS = 500L;
+  private final long TIMEOUT_MS = 2000L;
+  
+  private final Map<String, Instant> lastUpdateMap = new HashMap<> ();
+  
+  private final Runnable valueJanitor = () ->
+  {
+    LOG.log (Level.INFO, "Starting Value Janitor Monitor on Midi Device {0}.", AbstractMidiDevice.this);
+    try
+    {
+      synchronized (AbstractMidiDevice.this.parameterMap)
+      {
+        AbstractMidiDevice.this.lastUpdateMap.clear ();
+        for (final String key : AbstractMidiDevice.this.parameterMap.keySet ())
+          AbstractMidiDevice.this.lastUpdateMap.put (key, Instant.MIN);
+      }
+      final Set<String> keysToInvalidate = new LinkedHashSet<> ();
+      while (! Thread.interrupted ())
+      {
+        Thread.sleep (AbstractMidiDevice.this.VALUE_JANITOR_PERIOD_MS);
+        keysToInvalidate.clear ();
+        synchronized (AbstractMidiDevice.this.parameterMap)
+        {
+          final Instant now = Instant.now ();
+          for (final String key : AbstractMidiDevice.this.lastUpdateMap.keySet ())
+          {
+            final Duration duration = Duration.between (AbstractMidiDevice.this.lastUpdateMap.get (key), now);
+            boolean isExpired;
+            try
+            {
+              isExpired = duration.toMillis () > TIMEOUT_MS;
+            }
+            catch (ArithmeticException ae)
+            {
+              isExpired = true;
+            }
+            if (isExpired)
+              keysToInvalidate.add (key);
+          }
+          if (! keysToInvalidate.isEmpty ())
+          {
+            // LOG.log (Level.INFO, "Expiring parameter values for keys: {0}.", keysToInvalidate);
+            AbstractMidiDevice.this.invalidateParameterFromDevice (keysToInvalidate);
+          }
+        }
+      }
+    }
+    catch (InterruptedException ie)
+    {
+      // EMPTY
+    }
+    AbstractMidiDevice.this.invalidateParameterFromDevice (AbstractMidiDevice.this.parameterMap.keySet ());
+    LOG.log (Level.INFO, "Terminating Value Janitor Monitor on Midi Device {0}.", AbstractMidiDevice.this);
+  };
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
