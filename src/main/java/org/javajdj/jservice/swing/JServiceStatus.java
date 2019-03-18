@@ -16,12 +16,15 @@
  */
 package org.javajdj.jservice.swing;
 
+import java.awt.Color;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
 import org.javajdj.jservice.Service;
 import org.javajdj.swing.JColorCheckBox;
+import org.javajdj.swing.SwingUtilsJdJ;
 
 /** A tiny {@link JComponent} visualizing the {@link Service.Status} of a {@link Service} through color coding.
  *
@@ -31,6 +34,14 @@ import org.javajdj.swing.JColorCheckBox;
 public class JServiceStatus
   extends JColorCheckBox<Service.Status>
 {
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // LOGGING
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  private static final Logger LOG = Logger.getLogger (JServiceStatus.class.getName ());
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -60,6 +71,7 @@ public class JServiceStatus
       throw new IllegalArgumentException ();
     this.service = service;
     this.service.addStatusListener (this.statusListener);
+    setDisplayedValue (this.service.getStatus ());
   }
 
   /** Creates a service-monitoring component for given service with given color function.
@@ -88,34 +100,17 @@ public class JServiceStatus
   
   /** Creates a service-monitoring component for given service with default coloring.
    * 
-   * <p>
-   * The default coloring is none for {@link Service.Status#STOPPED},
-   * {@link java.awt.Color#green} for {@link Service.Status#ACTIVE},
-   * and {@link java.awt.Color#red} for {@link Service.Status#ERROR}.
-   * 
    * @param service  The service, non-{@code null}.
    * 
    * @throws IllegalArgumentException If the service is {@code null}.
    * 
    * @see JColorCheckBox
+   * @see JServiceStatus#DEFAULT_COLOR_FUNCTION
    * 
    */
   public JServiceStatus (final Service service)
   {
-    super ((final Service.Status t) ->
-    {
-      switch (t)
-      {
-        case STOPPED:
-          return null;
-        case ACTIVE:
-          return java.awt.Color.green;
-        case ERROR:
-          return java.awt.Color.red;
-        default:
-          throw new RuntimeException ();
-      }
-    });
+    super (JServiceStatus.DEFAULT_COLOR_FUNCTION);
     if (service == null)
       throw new IllegalArgumentException ();
     this.service = service;
@@ -149,12 +144,44 @@ public class JServiceStatus
   private final Service.StatusListener statusListener =
     (final Service service1, final Service.Status oldStatus, final Service.Status newStatus) ->
     {
-      final Runnable r = () -> JServiceStatus.this.setDisplayedValue (newStatus);
-      if (SwingUtilities.isEventDispatchThread ())
-        r.run ();
-      else
-        SwingUtilities.invokeLater (r);
+      // LOG.log (Level.INFO, "New Status [1]: {0}", newStatus);
+      SwingUtilsJdJ.invokeOnSwingEDT (() ->
+      {
+        JServiceStatus.this.setDisplayedValue (newStatus);
+        // LOG.log (Level.INFO, "New Status [2]: {0}", newStatus);
+      });
     };
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // DEFAULT COLOR FUNCTION
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** The default color function for {@link JServiceStatus}.
+   * 
+   * <p>
+   * The default coloring is none for {@link Service.Status#STOPPED},
+   * {@link Color#green} for {@link Service.Status#ACTIVE},
+   * and {@link Color#red} for {@link Service.Status#ERROR}.
+   * 
+   */
+  public final static Function<Service.Status, Color> DEFAULT_COLOR_FUNCTION = (final Service.Status status) ->
+  {
+    if (status == null)
+      return null;
+    switch (status)
+    {
+      case STOPPED:
+        return null;
+      case ACTIVE:
+        return java.awt.Color.green;
+      case ERROR:
+        return java.awt.Color.red;
+      default:
+        throw new RuntimeException ();
+    }
+  };
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
