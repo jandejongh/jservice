@@ -82,6 +82,34 @@ public class MidiUtils
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // MIDI MESSAGE FORMATTING [POLYPHONIC KEY PRESSURE]
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Creates a MIDI Polyphonic Key Pressure message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   * @return The newly created raw MIDI message.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   */
+  public final static byte[] createMidiPolyphonicKeyPressureMessage (final int midiChannel, final int note, final int pressure)
+  {
+    if (midiChannel < 1 || midiChannel > 16 || note < 0 || note > 127 || pressure < 0 || pressure > 127)
+      throw new IllegalArgumentException ();
+    final byte[] midiMessage = new byte[3];
+    midiMessage[0] = (byte) (0xA0 + (midiChannel - 1));
+    midiMessage[1] = (byte) note;
+    midiMessage[2] = (byte) pressure;
+    return midiMessage;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // MIDI MESSAGE FORMATTING [PROGRAM CHANGE]
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

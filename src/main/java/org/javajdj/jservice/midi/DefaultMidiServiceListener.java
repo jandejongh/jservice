@@ -101,6 +101,42 @@ public class DefaultMidiServiceListener
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // POLYPHONIC KEY PRESSURE
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Notification of the transmission of a MIDI Polyphonic Key Pressure message.
+   * 
+   * <p>
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  @Override
+  public void midiTxPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+  }
+
+  /** Notification of the reception of a MIDI Polyphonic Key Pressure message.
+   * 
+   * <p>
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  @Override  
+  public void midiRxPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // PROGRAM CHANGE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

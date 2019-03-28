@@ -225,6 +225,12 @@ public class JMidiService
   }
 
   @Override
+  public void sendMidiPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+    this.midiService.sendMidiPolyphonicKeyPressure (midiChannel, note, pressure);
+  }
+
+  @Override
   public void sendMidiProgramChange (final int midiChannel, final int patch)
   {
     this.midiService.sendMidiProgramChange (midiChannel, patch);

@@ -114,6 +114,16 @@ public abstract class AbstractMidiService
     sendRawMidiMessage (midiMessage);
     this.midiServiceListenerSupport.fireMidiTxNoteOn (midiChannel, note, velocity);
   }
+
+  @Override
+  public final void sendMidiPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiPolyphonicKeyPressureMessage (midiChannel, note, pressure);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxPolyphonicKeyPressure (midiChannel, note, pressure);
+  }
   
   @Override
   public final void sendMidiProgramChange (final int midiChannel, final int patch)

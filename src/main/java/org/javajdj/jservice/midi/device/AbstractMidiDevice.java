@@ -205,7 +205,86 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     throw new UnsupportedOperationException ();
   }
   
-  // XXX Note Off / On... XXX TODO
+  /** Transmits (schedules) a MIDI note off at the MIDI service.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see MidiService#sendMidiNoteOff
+   * 
+   */
+  protected final void sendMidiNoteOff (final int midiChannel, final int note, final int velocity)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiNoteOff (midiChannel, note, velocity);
+    }
+  }
+  
+  /** Transmits (schedules) a MIDI note on at the MIDI service.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param velocity    The velocity, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see MidiService#sendMidiNoteOn
+   * 
+   */
+  protected final void sendMidiNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiNoteOn (midiChannel, note, velocity);
+    }    
+  }
+  
+  /** Transmits (schedules) a MIDI polyphonic key pressure at the MIDI service.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see MidiService#sendMidiPolyphonicKeyPressure
+   * 
+   */
+  protected final void sendMidiPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiPolyphonicKeyPressure (midiChannel, note, pressure);
+    }        
+  }
   
   /** Transmits (schedules) a MIDI program change at the MIDI service.
    * 
@@ -233,7 +312,7 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     }
   }
   
-  /** Transmits (schedules) a MIDI control change.
+  /** Transmits (schedules) a MIDI control change at the MIDI service.
    * 
    * <p>
    * For sub-class use.
@@ -260,7 +339,7 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     }
   }
 
-  /** Transmits (schedules) a MIDI System Exclusive (SysEx) message.
+  /** Transmits (schedules) a MIDI System Exclusive (SysEx) message at the MIDI service.
    * 
    * <p>
    * For sub-class use.
@@ -725,6 +804,15 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     }
 
     @Override
+    public void midiRxPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+    {
+      if (getStatus () == Status.STOPPED)
+        return;
+      if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
+        AbstractMidiDevice.this.onMidiRxPolyphonicKeyPressure (midiChannel, note, pressure);
+    }
+
+    @Override
     public void midiRxProgramChange (final int midiChannel, final int patch)
     {
       if (getStatus () == Status.STOPPED)
@@ -779,6 +867,21 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
    * 
    */
   protected void onMidiRxNoteOn (final int midiChannel, final int note, final int velocity)
+  {
+  }
+  
+  /** Invoked when a MIDI Polyphonic Key Pressure message has been received from the {@link MidiService}.
+   * 
+   * <p>
+   * For sub-class use.
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  protected void onMidiRxPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
   {
   }
   

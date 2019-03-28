@@ -171,6 +171,30 @@ public class MidiService_FromRaw
     this.midiServiceListenerSupport.fireMidiRxNoteOn (midiChannel, note, velocity);
   }
   
+  /** Notifies listeners of the transmission of a MIDI polyphonic key pressure message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiTxPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+    this.midiServiceListenerSupport.fireMidiTxPolyphonicKeyPressure (midiChannel, note, pressure);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI polyphonic key pressure message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiRxPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+    this.midiServiceListenerSupport.fireMidiRxPolyphonicKeyPressure (midiChannel, note, pressure);
+  }
+  
   /** Notifies registered {@link MidiServiceListener}s of the transmission of a MIDI program (patch) change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
@@ -263,6 +287,16 @@ public class MidiService_FromRaw
     final byte[] midiMessage = MidiUtils.createMidiNoteOnMessage (midiChannel, note, velocity);
     sendRawMidiMessage (midiMessage);
     this.midiServiceListenerSupport.fireMidiTxNoteOn (midiChannel, note, velocity);
+  }
+    
+  @Override
+  public final void sendMidiPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiPolyphonicKeyPressureMessage (midiChannel, note, pressure);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxPolyphonicKeyPressure (midiChannel, note, pressure);
   }
     
   @Override
@@ -423,10 +457,15 @@ public class MidiService_FromRaw
           //   new Object[]{midiChannel, note, velocity});
           break;
         }
-        case CHANNEL_PRESSURE_AFTERTOUCH:
+        case POLYPHONIC_KEY_PRESSURE_AFTERTOUCH:
         {
-          throw new UnsupportedOperationException ();
-          // break
+          final int midiChannel = (statusByte & 0x0F) + 1;
+          final int note = (byte) rawMidiMessage[1];
+          final int pressure = (byte) rawMidiMessage[2];
+          fireMidiRxPolyphonicKeyPressure (midiChannel, note, pressure);
+          // LOG.log (Level.INFO, "Received polyphonic key pressure, channel={0}, note={1}, pressure={2}.",
+          //   new Object[]{midiChannel, note, pressure});
+          break;
         }
         case PROGRAM_CHANGE:
         {
@@ -446,7 +485,7 @@ public class MidiService_FromRaw
           //   new Object[]{midiChannel, controller, value});
           break;
         }
-        case POLYPHONIC_KEY_PRESSURE_AFTERTOUCH:
+        case CHANNEL_PRESSURE_AFTERTOUCH:
           throw new UnsupportedOperationException ();
         case PITCH_BEND_CHANGE:
           throw new UnsupportedOperationException ();

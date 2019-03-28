@@ -146,6 +146,42 @@ public class MidiServiceListenerSupport
       l.midiRxNoteOn (midiChannel, note, velocity);
   }
   
+  /** Notifies listeners of the transmission of a MIDI polyphonic key pressure message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiTxPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiTxPolyphonicKeyPressure (midiChannel, note, pressure);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI polyphonic key pressure message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiRxPolyphonicKeyPressure (final int midiChannel, final int note, final int pressure)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiRxPolyphonicKeyPressure (midiChannel, note, pressure);
+  }
+  
   /** Notifies listeners of the transmission of a MIDI program (patch) change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.

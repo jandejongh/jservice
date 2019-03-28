@@ -87,6 +87,19 @@ public interface MidiService
    */
   void sendMidiNoteOn (int midiChannel, int note, int velocity);
   
+  /** Transmits (schedules) a MIDI polyphonic key pressure (after-touch) message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see #sendRawMidiMessage
+   * 
+   */
+  void sendMidiPolyphonicKeyPressure (int midiChannel, int note, int pressure);
+  
   /** Transmits (schedules) a MIDI program change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.

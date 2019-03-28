@@ -77,6 +77,30 @@ public interface MidiServiceListener
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // POLYPHONIC KEY PRESSURE
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Notification of the transmission of a MIDI Polyphonic Key Pressure message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  void midiTxPolyphonicKeyPressure (int midiChannel, int note, int pressure);
+  
+  /** Notification of the reception of a MIDI Polyphonic Key Pressure message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param note        The note, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  void midiRxPolyphonicKeyPressure (int midiChannel, int note, int pressure);
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // PROGRAM (PATCH) CHANGE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
