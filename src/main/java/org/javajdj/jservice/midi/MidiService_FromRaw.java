@@ -195,28 +195,6 @@ public class MidiService_FromRaw
     this.midiServiceListenerSupport.fireMidiRxPolyphonicKeyPressure (midiChannel, note, pressure);
   }
   
-  /** Notifies registered {@link MidiServiceListener}s of the transmission of a MIDI program (patch) change.
-   * 
-   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param patch       The patch (program) number, between zero and 127 inclusive.
-   * 
-   */
-  protected final void fireMidiTxProgramChange (final int midiChannel, final int patch)
-  {
-    this.midiServiceListenerSupport.fireMidiTxProgramChange (midiChannel, patch);
-  }
-
-  /** Notifies registered {@link MidiServiceListener}s of the reception of a MIDI program (patch) change.
-   * 
-   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param patch       The patch (program) number, between zero and 127 inclusive.
-   * 
-   */
-  protected final void fireMidiRxProgramChange (final int midiChannel, final int patch)
-  {
-    this.midiServiceListenerSupport.fireMidiRxProgramChange (midiChannel, patch);
-  }
-
   /** Notifies registered {@link MidiServiceListener}s of the transmission of a MIDI control change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
@@ -241,6 +219,72 @@ public class MidiService_FromRaw
     this.midiServiceListenerSupport.fireMidiRxControlChange (midiChannel, controller, value);
   }
 
+  /** Notifies registered {@link MidiServiceListener}s of the transmission of a MIDI program (patch) change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param patch       The patch (program) number, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiTxProgramChange (final int midiChannel, final int patch)
+  {
+    this.midiServiceListenerSupport.fireMidiTxProgramChange (midiChannel, patch);
+  }
+
+  /** Notifies registered {@link MidiServiceListener}s of the reception of a MIDI program (patch) change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param patch       The patch (program) number, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiRxProgramChange (final int midiChannel, final int patch)
+  {
+    this.midiServiceListenerSupport.fireMidiRxProgramChange (midiChannel, patch);
+  }
+
+  /** Notifies registered {@link MidiServiceListener}s of the transmission of a MIDI channel pressure.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiTxChannelPressure (final int midiChannel, final int pressure)
+  {
+    this.midiServiceListenerSupport.fireMidiTxChannelPressure (midiChannel, pressure);
+  }
+  
+  /** Notifies registered {@link MidiServiceListener}s of the reception of a MIDI channel pressure.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  protected final void fireMidiRxChannelPressure (final int midiChannel, final int pressure)
+  {
+    this.midiServiceListenerSupport.fireMidiRxChannelPressure (midiChannel, pressure);
+  }
+  
+  /** Notifies registered {@link MidiServiceListener}s of the transmission of a MIDI pitch bend change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   */
+  protected final void fireMidiTxPitchBendChange (final int midiChannel, final int pitchBend)
+  {
+    this.midiServiceListenerSupport.fireMidiTxPitchBendChange (midiChannel, pitchBend);
+  }
+  
+  /** Notifies registered {@link MidiServiceListener}s of the reception of a MIDI pitch bend change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   */
+  protected final void fireMidiRxPitchBendChange (final int midiChannel, final int pitchBend)
+  {
+    this.midiServiceListenerSupport.fireMidiRxPitchBendChange (midiChannel, pitchBend);
+  }
+  
   /** Notifies registered {@link MidiServiceListener}s of the transmission of a MIDI System Exclusive (SysEx) message.
    * 
    * @param vendorId       The vendor ID.
@@ -300,6 +344,16 @@ public class MidiService_FromRaw
   }
     
   @Override
+  public final void sendMidiControlChange (final int midiChannel, final int controller, final int value)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiControlChangeMessage (midiChannel, controller, value);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxControlChange (midiChannel, controller, value);
+  }
+
+  @Override
   public final void sendMidiProgramChange (final int midiChannel, final int patch)
   {
     if (getStatus () != Status.ACTIVE)
@@ -310,13 +364,23 @@ public class MidiService_FromRaw
   }
 
   @Override
-  public final void sendMidiControlChange (final int midiChannel, final int controller, final int value)
+  public final void sendMidiChannelPressure (final int midiChannel, final int pressure)
   {
     if (getStatus () != Status.ACTIVE)
       return;
-    final byte[] midiMessage = MidiUtils.createMidiControlChangeMessage (midiChannel, controller, value);
+    final byte[] midiMessage = MidiUtils.createMidiChannelPressureMessage (midiChannel, pressure);
     sendRawMidiMessage (midiMessage);
-    this.midiServiceListenerSupport.fireMidiTxControlChange (midiChannel, controller, value);
+    this.midiServiceListenerSupport.fireMidiTxChannelPressure (midiChannel, pressure);
+  }
+
+  @Override
+  public final void sendMidiPitchBendChange (final int midiChannel, final int pitchBend)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiPitchBendChangeMessage (midiChannel, pitchBend);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxPitchBendChange (midiChannel, pitchBend);
   }
 
   @Override
@@ -440,8 +504,8 @@ public class MidiService_FromRaw
         case NOTE_OFF:
         {
           final int midiChannel = (statusByte & 0x0F) + 1;
-          final int note = (byte) rawMidiMessage[1];
-          final int velocity = (byte) rawMidiMessage[2];
+          final int note = rawMidiMessage[1];
+          final int velocity = rawMidiMessage[2];
           fireMidiRxNoteOff (midiChannel, note, velocity);
           // LOG.log (Level.INFO, "Received note off, channel={0}, note={1}, velocity={2}.",
           //   new Object[]{midiChannel, note, velocity});
@@ -450,8 +514,8 @@ public class MidiService_FromRaw
         case NOTE_ON:
         {
           final int midiChannel = (statusByte & 0x0F) + 1;
-          final int note = (byte) rawMidiMessage[1];
-          final int velocity = (byte) rawMidiMessage[2];
+          final int note = rawMidiMessage[1];
+          final int velocity = rawMidiMessage[2];
           fireMidiRxNoteOn (midiChannel, note, velocity);
           // LOG.log (Level.INFO, "Received note on, channel={0}, note={1}, velocity={2}.",
           //   new Object[]{midiChannel, note, velocity});
@@ -460,19 +524,11 @@ public class MidiService_FromRaw
         case POLYPHONIC_KEY_PRESSURE_AFTERTOUCH:
         {
           final int midiChannel = (statusByte & 0x0F) + 1;
-          final int note = (byte) rawMidiMessage[1];
-          final int pressure = (byte) rawMidiMessage[2];
+          final int note = rawMidiMessage[1];
+          final int pressure = rawMidiMessage[2];
           fireMidiRxPolyphonicKeyPressure (midiChannel, note, pressure);
           // LOG.log (Level.INFO, "Received polyphonic key pressure, channel={0}, note={1}, pressure={2}.",
           //   new Object[]{midiChannel, note, pressure});
-          break;
-        }
-        case PROGRAM_CHANGE:
-        {
-          final int midiChannel = (statusByte & 0x0F) + 1;
-          final int patch = (byte) rawMidiMessage[1];
-          fireMidiRxProgramChange (midiChannel, patch);
-          // LOG.log (Level.INFO, "Received program change, channel={0}, patch={1}.", new Object[]{midiChannel, patch});
           break;
         }
         case CONTROL_CHANGE:
@@ -485,10 +541,32 @@ public class MidiService_FromRaw
           //   new Object[]{midiChannel, controller, value});
           break;
         }
+        case PROGRAM_CHANGE:
+        {
+          final int midiChannel = (statusByte & 0x0F) + 1;
+          final int patch = rawMidiMessage[1];
+          fireMidiRxProgramChange (midiChannel, patch);
+          // LOG.log (Level.INFO, "Received program change, channel={0}, patch={1}.", new Object[]{midiChannel, patch});
+          break;
+        }
         case CHANNEL_PRESSURE_AFTERTOUCH:
-          throw new UnsupportedOperationException ();
+        {
+          final int midiChannel = (statusByte & 0x0F) + 1;
+          final int pressure = rawMidiMessage[1];
+          fireMidiRxChannelPressure (midiChannel, pressure);
+          // LOG.log (Level.INFO, "Received channel pressure, channel={0}, pressure={1}.", new Object[]{midiChannel, pressure});
+          break;
+        }
         case PITCH_BEND_CHANGE:
-          throw new UnsupportedOperationException ();
+        {
+          final int midiChannel = (statusByte & 0x0F) + 1;
+          final int pitchBend_l = rawMidiMessage[1];
+          final int pitchBend_h = rawMidiMessage[2];
+          final int pitchBend = (pitchBend_h << 7) + pitchBend_l;
+          fireMidiRxPitchBendChange (midiChannel, pitchBend);
+          // LOG.log (Level.INFO, "Received pitch bend change, channel={0}, pitchBend={1}.", new Object[]{midiChannel, pitchBend});
+          break;
+        }
         case SYSTEM_COMMON_SYSEX:
         {
           // System Exclusive
