@@ -231,15 +231,27 @@ public class JMidiService
   }
 
   @Override
+  public void sendMidiControlChange (final int midiChannel, final int controller, final int value)
+  {
+    this.midiService.sendMidiControlChange (midiChannel, controller, value);
+  }
+
+  @Override
   public void sendMidiProgramChange (final int midiChannel, final int patch)
   {
     this.midiService.sendMidiProgramChange (midiChannel, patch);
   }
 
   @Override
-  public void sendMidiControlChange (final int midiChannel, final int controller, final int value)
+  public void sendMidiChannelPressure (final int midiChannel, final int pressure)
   {
-    this.midiService.sendMidiControlChange (midiChannel, controller, value);
+    this.midiService.sendMidiChannelPressure (midiChannel, pressure);
+  }
+
+  @Override
+  public void sendMidiPitchBendChange (final int midiChannel, final int pitchBend)
+  {
+    this.midiService.sendMidiPitchBendChange (midiChannel, pitchBend);
   }
 
   @Override
