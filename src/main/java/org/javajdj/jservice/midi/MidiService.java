@@ -16,6 +16,7 @@
  */
 package org.javajdj.jservice.midi;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.javajdj.jservice.activity.ActivityMonitorable;
@@ -100,18 +101,6 @@ public interface MidiService
    */
   void sendMidiPolyphonicKeyPressure (int midiChannel, int note, int pressure);
   
-  /** Transmits (schedules) a MIDI program change.
-   * 
-   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param patch       The patch (program) number, between zero and 127 inclusive.
-   * 
-   * @throws IllegalArgumentException If any of the arguments is out of range.
-   * 
-   * @see #sendRawMidiMessage
-   * 
-   */
-  void sendMidiProgramChange (int midiChannel, int patch);
-  
   /** Transmits (schedules) a MIDI control change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
@@ -124,6 +113,42 @@ public interface MidiService
    * 
    */
   void sendMidiControlChange (int midiChannel, int controller, int value);
+  
+  /** Transmits (schedules) a MIDI program change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param patch       The patch (program) number, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see #sendRawMidiMessage
+   * 
+   */
+  void sendMidiProgramChange (int midiChannel, int patch);
+  
+  /** Transmits (schedules) a MIDI channel pressure.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see #sendRawMidiMessage
+   * 
+   */
+  void sendMidiChannelPressure (int midiChannel, int pressure);
+  
+  /** Transmits (schedules) a MIDI pitch bend change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see #sendRawMidiMessage
+   * 
+   */
+  void sendMidiPitchBendChange (int midiChannel, int pitchBend);
   
   /** Transmits (schedules) a MIDI System Exclusive (SysEx) message.
    * 
@@ -192,8 +217,7 @@ public interface MidiService
     static Set<String> create (final Set<String> startSet, final String ... stringsToAdd)
     {
       final Set<String> stringSet = new LinkedHashSet<> (startSet);
-      for (int i = 0; i < stringsToAdd.length; i++)
-        stringSet.add (stringsToAdd[i]);
+      stringSet.addAll (Arrays.asList (stringsToAdd));
       return stringSet;
     }
     
