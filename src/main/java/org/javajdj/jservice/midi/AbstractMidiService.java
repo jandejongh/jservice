@@ -126,6 +126,16 @@ public abstract class AbstractMidiService
   }
   
   @Override
+  public final void sendMidiControlChange (final int midiChannel, final int controller, final int value)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiControlChangeMessage (midiChannel, controller, value);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxControlChange (midiChannel, controller, value);
+  }
+  
+  @Override
   public final void sendMidiProgramChange (final int midiChannel, final int patch)
   {
     if (getStatus () != Status.ACTIVE)
@@ -136,13 +146,23 @@ public abstract class AbstractMidiService
   }
 
   @Override
-  public final void sendMidiControlChange (final int midiChannel, final int controller, final int value)
+  public final void sendMidiChannelPressure (final int midiChannel, final int pressure)
   {
     if (getStatus () != Status.ACTIVE)
       return;
-    final byte[] midiMessage = MidiUtils.createMidiControlChangeMessage (midiChannel, controller, value);
+    final byte[] midiMessage = MidiUtils.createMidiChannelPressureMessage (midiChannel, pressure);
     sendRawMidiMessage (midiMessage);
-    this.midiServiceListenerSupport.fireMidiTxControlChange (midiChannel, controller, value);
+    this.midiServiceListenerSupport.fireMidiTxChannelPressure (midiChannel, pressure);    
+  }
+  
+  @Override
+  public final void sendMidiPitchBendChange (final int midiChannel, final int pitchBend)
+  {
+    if (getStatus () != Status.ACTIVE)
+      return;
+    final byte[] midiMessage = MidiUtils.createMidiPitchBendChangeMessage (midiChannel, pitchBend);
+    sendRawMidiMessage (midiMessage);
+    this.midiServiceListenerSupport.fireMidiTxPitchBendChange (midiChannel, pitchBend);    
   }
   
   @Override
