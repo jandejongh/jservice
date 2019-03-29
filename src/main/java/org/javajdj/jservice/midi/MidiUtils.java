@@ -110,6 +110,36 @@ public class MidiUtils
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // MIDI MESSAGE FORMATTING [CONTROL CHANGE]
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Creates a MIDI Control Change message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param controller  The MIDI controller number, between zero and 127 inclusive.
+   * @param value       The new value for the controller, between zero and 127 inclusive.
+   * 
+   * @return The newly created raw MIDI message.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   */
+  public final static byte[] createMidiControlChangeMessage (final int midiChannel, final int controller, final int value)
+  {
+    if (midiChannel < 1 || midiChannel > 16
+      || controller < 0 || controller > 127
+      || value < 0 || value > 127)
+      throw new IllegalArgumentException ();
+    final byte[] midiMessage = new byte[3];
+    midiMessage[0] = (byte) (0xB0 + (midiChannel - 1));
+    midiMessage[1] = (byte) controller;
+    midiMessage[2] = (byte) value;
+    return midiMessage;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // MIDI MESSAGE FORMATTING [PROGRAM CHANGE]
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,31 +166,54 @@ public class MidiUtils
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // MIDI MESSAGE FORMATTING [CONTROL CHANGE]
+  // MIDI MESSAGE FORMATTING [CHANNEL PRESSURE]
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  /** Creates a MIDI Control Change message.
+  /** Creates a MIDI Channel Pressure message.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param controller  The MIDI controller number, between zero and 127 inclusive.
-   * @param value       The new value for the controller, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
    * 
    * @return The newly created raw MIDI message.
    * 
    * @throws IllegalArgumentException If any of the arguments is out of range.
    * 
    */
-  public final static byte[] createMidiControlChangeMessage (final int midiChannel, final int controller, final int value)
+  public final static byte[] createMidiChannelPressureMessage (final int midiChannel, final int pressure)
   {
-    if (midiChannel < 1 || midiChannel > 16
-      || controller < 0 || controller > 127
-      || value < 0 || value > 127)
+    if (midiChannel < 1 || midiChannel > 16 || pressure < 0 || pressure > 127)
+      throw new IllegalArgumentException ();
+    final byte[] midiMessage = new byte[2];
+    midiMessage[0] = (byte) (0xD0 + (midiChannel - 1));
+    midiMessage[1] = (byte) pressure;
+    return midiMessage;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // MIDI MESSAGE FORMATTING [PITCH BEND CHANGE]
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Creates a MIDI Pitch Bend Change message.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   * @return The newly created raw MIDI message.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   */
+  public final static byte[] createMidiPitchBendChangeMessage (final int midiChannel, final int pitchBend)
+  {
+    if (midiChannel < 1 || midiChannel > 16 || pitchBend < -8192 || pitchBend > 8191)
       throw new IllegalArgumentException ();
     final byte[] midiMessage = new byte[3];
-    midiMessage[0] = (byte) (0xB0 + (midiChannel - 1));
-    midiMessage[1] = (byte) controller;
-    midiMessage[2] = (byte) value;
+    midiMessage[0] = (byte) (0xE0 + (midiChannel - 1));
+    midiMessage[1] = (byte) ((pitchBend + 8192) & 0x7F);
+    midiMessage[2] = (byte) (((pitchBend + 8192) & 0x3F80) >>> 7);
     return midiMessage;
   }
   
