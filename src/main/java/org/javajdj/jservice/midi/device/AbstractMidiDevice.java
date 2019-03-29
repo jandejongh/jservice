@@ -286,32 +286,6 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     }        
   }
   
-  /** Transmits (schedules) a MIDI program change at the MIDI service.
-   * 
-   * <p>
-   * For sub-class use.
-   * 
-   * <p>
-   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
-   * or if there is no {@link MidiService} available.
-   * 
-   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param patch       The patch (program) number, between zero and 127 inclusive.
-   * 
-   * @throws IllegalArgumentException If any of the arguments is out of range.
-   * 
-   * @see MidiService#sendMidiProgramChange
-   * 
-   */
-  protected final void sendMidiProgramChange (final int midiChannel, final int patch)
-  {
-    synchronized (this)
-    {
-      if (getStatus () != Status.STOPPED && getMidiService () != null)
-        getMidiService ().sendMidiProgramChange (midiChannel, patch);
-    }
-  }
-  
   /** Transmits (schedules) a MIDI control change at the MIDI service.
    * 
    * <p>
@@ -339,6 +313,84 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     }
   }
 
+  /** Transmits (schedules) a MIDI program change at the MIDI service.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param patch       The patch (program) number, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see MidiService#sendMidiProgramChange
+   * 
+   */
+  protected final void sendMidiProgramChange (final int midiChannel, final int patch)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiProgramChange (midiChannel, patch);
+    }
+  }
+  
+  /** Transmits (schedules) a MIDI channel pressure at the MIDI service.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see MidiService#sendMidiChannelPressure
+   * 
+   */
+  protected final void sendMidiChannelPressure (final int midiChannel, final int pressure)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiChannelPressure (midiChannel, pressure);
+    }
+  }
+  
+  /** Transmits (schedules) a MIDI pitch bend change at the MIDI service.
+   * 
+   * <p>
+   * For sub-class use.
+   * 
+   * <p>
+   * The request is silently ignored if this {@link Service} is {@link Status#STOPPED},
+   * or if there is no {@link MidiService} available.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   * @throws IllegalArgumentException If any of the arguments is out of range.
+   * 
+   * @see MidiService#sendMidiPitchBendChange
+   * 
+   */
+  protected final void sendMidiPitchBendChange (final int midiChannel, final int pitchBend)
+  {
+    synchronized (this)
+    {
+      if (getStatus () != Status.STOPPED && getMidiService () != null)
+        getMidiService ().sendMidiPitchBendChange (midiChannel, pitchBend);
+    }
+  }
+  
   /** Transmits (schedules) a MIDI System Exclusive (SysEx) message at the MIDI service.
    * 
    * <p>
@@ -813,6 +865,15 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     }
 
     @Override
+    public void midiRxControlChange (final int midiChannel, final int controller, final int value)
+    {
+      if (getStatus () == Status.STOPPED)
+        return;
+      if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
+        AbstractMidiDevice.this.onMidiRxControlChange (midiChannel, controller, value);
+    }
+
+    @Override
     public void midiRxProgramChange (final int midiChannel, final int patch)
     {
       if (getStatus () == Status.STOPPED)
@@ -822,12 +883,21 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
     }
 
     @Override
-    public void midiRxControlChange (final int midiChannel, final int controller, final int value)
+    public void midiRxChannelPressure (final int midiChannel, final int pressure)
     {
       if (getStatus () == Status.STOPPED)
         return;
       if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
-        AbstractMidiDevice.this.onMidiRxControlChange (midiChannel, controller, value);
+        AbstractMidiDevice.this.onMidiRxChannelPressure (midiChannel, pressure);
+    }
+
+    @Override
+    public void midiRxPitchBendChange (final int midiChannel, final int pitchBend)
+    {
+      if (getStatus () == Status.STOPPED)
+        return;
+      if (AbstractMidiDevice.this.isMidiRxOmni () || AbstractMidiDevice.this.getMidiChannel () == midiChannel)
+        AbstractMidiDevice.this.onMidiRxPitchBendChange (midiChannel, pitchBend);
     }
 
     @Override
@@ -885,6 +955,21 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   {
   }
   
+  /** Invoked when a MIDI Control Change message has been received from the {@link MidiService}.
+   * 
+   * <p>
+   * For sub-class use.
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param controller  The MIDI controller number, between zero and 127 inclusive.
+   * @param value       The value for the controller, between zero and 127 inclusive.
+   * 
+   */
+  protected void onMidiRxControlChange (final int midiChannel, final int controller, final int value)
+  {
+  }
+  
   /** Invoked when a MIDI Program Change message has been received from the {@link MidiService}.
    * 
    * <p>
@@ -899,18 +984,31 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
   {
   }
   
-  /** Invoked when a MIDI Control Change message has been received from the {@link MidiService}.
+  /** Invoked when a MIDI Channel Pressure message has been received from the {@link MidiService}.
    * 
    * <p>
    * For sub-class use.
    * This implementation does nothing.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param controller  The MIDI controller number, between zero and 127 inclusive.
-   * @param value       The value for the controller, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
    * 
    */
-  protected void onMidiRxControlChange (final int midiChannel, final int controller, final int value)
+  protected void onMidiRxChannelPressure (final int midiChannel, final int pressure)
+  {
+  }
+  
+  /** Invoked when a MIDI Pitch Bend Change message has been received from the {@link MidiService}.
+   * 
+   * <p>
+   * For sub-class use.
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   */
+  protected void onMidiRxPitchBendChange (final int midiChannel, final int pitchBend)
   {
   }
   
