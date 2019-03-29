@@ -182,40 +182,6 @@ public class MidiServiceListenerSupport
       l.midiRxPolyphonicKeyPressure (midiChannel, note, pressure);
   }
   
-  /** Notifies listeners of the transmission of a MIDI program (patch) change.
-   * 
-   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param patch       The patch (program) number, between zero and 127 inclusive.
-   * 
-   */
-  public final void fireMidiTxProgramChange (final int midiChannel, final int patch)
-  {
-    final Set<MidiServiceListener> listeners;
-    synchronized (this.midiServiceListenersLock)
-    {
-      listeners = new LinkedHashSet<> (this.midiServiceListeners);
-    }
-    for (final MidiServiceListener l : listeners)
-      l.midiTxProgramChange (midiChannel, patch);
-  }
-  
-  /** Notifies listeners of the reception of a MIDI program (patch) change.
-   * 
-   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param patch       The patch (program) number, between zero and 127 inclusive.
-   * 
-   */
-  public final void fireMidiRxProgramChange (final int midiChannel, final int patch)
-  {
-    final Set<MidiServiceListener> listeners;
-    synchronized (this.midiServiceListenersLock)
-    {
-      listeners = new LinkedHashSet<> (this.midiServiceListeners);
-    }
-    for (final MidiServiceListener l : listeners)
-      l.midiRxProgramChange (midiChannel, patch);
-  }
-  
   /** Notifies listeners of the transmission of a MIDI control change.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
@@ -250,6 +216,108 @@ public class MidiServiceListenerSupport
     }
     for (final MidiServiceListener l : listeners)
       l.midiRxControlChange (midiChannel, controller, value);    
+  }
+  
+  /** Notifies listeners of the transmission of a MIDI program (patch) change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param patch       The patch (program) number, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiTxProgramChange (final int midiChannel, final int patch)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiTxProgramChange (midiChannel, patch);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI program (patch) change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param patch       The patch (program) number, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiRxProgramChange (final int midiChannel, final int patch)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiRxProgramChange (midiChannel, patch);
+  }
+  
+  /** Notifies listeners of the transmission of a MIDI channel pressure.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiTxChannelPressure (final int midiChannel, final int pressure)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiTxChannelPressure (midiChannel, pressure);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI channel pressure.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
+   * 
+   */
+  public final void fireMidiRxChannelPressure (final int midiChannel, final int pressure)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiRxChannelPressure (midiChannel, pressure);
+  }
+  
+  /** Notifies listeners of the transmission of a MIDI pitch bend change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   */
+  public final void fireMidiTxPitchBendChange (final int midiChannel, final int pitchBend)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiTxPitchBendChange (midiChannel, pitchBend);
+  }
+  
+  /** Notifies listeners of the reception of a MIDI pitch bend change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   */
+  public final void fireMidiRxPitchBendChange (final int midiChannel, final int pitchBend)
+  {
+    final Set<MidiServiceListener> listeners;
+    synchronized (this.midiServiceListenersLock)
+    {
+      listeners = new LinkedHashSet<> (this.midiServiceListeners);
+    }
+    for (final MidiServiceListener l : listeners)
+      l.midiRxPitchBendChange (midiChannel, pitchBend);
   }
   
   /** Notifies listeners of the transmission of a MIDI System Exclusive (SysEx) message.
