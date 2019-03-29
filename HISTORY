@@ -13,3 +13,8 @@ Release 1
 
 1.0.1 [20190318]
         - Several bug fixes and minor improvements.
+	
+1.1.0 [20190329]
+        - Extended MIDI support: Polyphomnic Key Pressure; Channel Pressure; Pitch Bend Change.
+	- Cosmetics in lay-out.
+	- Minor javadoc fixes.
