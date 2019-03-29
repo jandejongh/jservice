@@ -101,6 +101,30 @@ public interface MidiServiceListener
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // CONTROL CHANGE
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Notification of the transmission of a MIDI control change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param controller  The MIDI controller number, between zero and 127 inclusive.
+   * @param value       The value for the controller, between zero and 127 inclusive.
+   * 
+   */
+  void midiTxControlChange (int midiChannel, int controller, int value);
+  
+  /** Notification of the reception of a MIDI control change.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param controller  The MIDI controller number, between zero and 127 inclusive.
+   * @param value       The value for the controller, between zero and 127 inclusive.
+   * 
+   */
+  void midiRxControlChange (int midiChannel, int controller, int value);
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // PROGRAM (PATCH) CHANGE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,27 +147,59 @@ public interface MidiServiceListener
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // CONTROL CHANGE
+  // CHANNEL PRESSURE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  /** Notification of the transmission of a MIDI control change.
+
+  /** Notification of the transmission of a MIDI channel pressure.
+   * 
+   * <p>
+   * This implementation does nothing.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param controller  The MIDI controller number, between zero and 127 inclusive.
-   * @param value       The value for the controller, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
    * 
    */
-  void midiTxControlChange (int midiChannel, int controller, int value);
+  void midiTxChannelPressure (int midiChannel, int pressure);
   
-  /** Notification of the reception of a MIDI control change.
+  /** Notification of the reception of a MIDI channel pressure.
+   * 
+   * <p>
+   * This implementation does nothing.
    * 
    * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
-   * @param controller  The MIDI controller number, between zero and 127 inclusive.
-   * @param value       The value for the controller, between zero and 127 inclusive.
+   * @param pressure    The pressure, between zero and 127 inclusive.
    * 
    */
-  void midiRxControlChange (int midiChannel, int controller, int value);
+  void midiRxChannelPressure (int midiChannel, int pressure);
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // PITCH BEND CHANGE
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /** Notification of the transmission of a MIDI pitch bend change.
+   * 
+   * <p>
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   */
+  public void midiTxPitchBendChange (int midiChannel, int pitchBend);
+  
+  /** Notification of the reception of a MIDI pitch bend change.
+   * 
+   * <p>
+   * This implementation does nothing.
+   * 
+   * @param midiChannel The MIDI channel number, between unity and 16 inclusive.
+   * @param pitchBend   The pitch bend, between -8192 and +8191 inclusive; zero meaning no pitch change.
+   * 
+   */
+  public void midiRxPitchBendChange (int midiChannel, int pitchBend);
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
