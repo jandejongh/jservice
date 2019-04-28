@@ -521,6 +521,8 @@ public abstract class AbstractMidiDevice<D extends ParameterDescriptor>
       //  LOG.log (Level.INFO, "Key={0}: old={1}; new={2}: changed={3}.", new Object[]{key, oldValue, value, changed});
       if (changed)
         this.parameterMap.put (key, value);
+      // if (changed)
+      //   LOG.log (Level.INFO, "Device: {0}: {1} -> {2}.", new Object[]{key, oldValue, value});
     }
     if (changed)
       fireParameterChanged (Collections.singletonMap (key, value));
