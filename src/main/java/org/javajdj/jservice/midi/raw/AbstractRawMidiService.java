@@ -48,12 +48,12 @@ public abstract class AbstractRawMidiService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  /** Constructs a raw MIDI service with name {@code "No Name"}.
+  /** Constructs a raw MIDI service with name {@code "AbstractRawMidiService"}.
    * 
    */
   public AbstractRawMidiService ()
   {
-    this ("No Name");
+    this ("AbstractRawMidiService");
   }
 
   /** Constructs a raw MIDI service with given name.
