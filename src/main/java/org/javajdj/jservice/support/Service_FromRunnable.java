@@ -53,14 +53,31 @@ public class Service_FromRunnable
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  /** Creates a service with given name and from given {@link Runnable}.
+   * 
+   * @param name     The service name, non-{@code null}.
+   * @param runnable The {@link Runnable}, may be {@code null}.
+   * 
+   * @throws IllegalArgumentException If {@code name == null}.
+   * 
+   */
+  public Service_FromRunnable (final String name, final Runnable runnable)
+  {
+    super (name);
+    this.runnable = runnable;
+  }
+
   /** Creates a service from given {@link Runnable}.
    * 
+   * <p>
+   * The service name is set to {@code "Service_FromRunnable"}.
+   *
    * @param runnable The {@link Runnable}, may be {@code null}.
    * 
    */
   public Service_FromRunnable (final Runnable runnable)
   {
-    this.runnable = runnable;
+    this ("Service_FromRunnable", runnable);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -45,12 +45,27 @@ public final class Service_None
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  /** Creates a service with given name and that does nothing (guaranteed).
+   * 
+   * @param name The service name, non-{@code null}.
+   * 
+   * @throws IllegalArgumentException If {@code name == null}.
+   * 
+   */
+  public Service_None (final String name)
+  {
+    super (name);
+  }
+
   /** Creates a service that does nothing (guaranteed).
+   * 
+   * <p>
+   * The service name is set to {@code "Service_None"}.
    * 
    */
   public Service_None ()
   {
-    super ();
+    this ("Service_None");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

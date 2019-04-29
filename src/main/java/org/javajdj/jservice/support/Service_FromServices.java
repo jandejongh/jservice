@@ -57,15 +57,34 @@ public class Service_FromServices
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  /** Creates a service with given name and from given {@link Service}s.
+   * 
+   * @param name           The service name, non-{@code null}.
+   * @param targetServices The {@link Service}s, may be {@code null} or empty.
+   * 
+   * @throws IllegalArgumentException If {@code name == null}.
+   * 
+   */
+  public Service_FromServices (final String name, final List<Service> targetServices)
+  {
+    super (name);
+    if (targetServices != null)
+      this.targetServices.addAll (targetServices);
+  }
+
   /** Creates a service from given {@link Service}s.
    * 
+   * <p>
+   * The service name is set to {@code "Service_FromServices"}.
+   * 
    * @param targetServices The {@link Service}s, may be {@code null} or empty.
+   * 
+   * @throws IllegalArgumentException If {@code name == null}.
    * 
    */
   public Service_FromServices (final List<Service> targetServices)
   {
-    if (targetServices != null)
-      this.targetServices.addAll (targetServices);
+    this ("Service_FromServices", targetServices);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

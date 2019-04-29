@@ -22,9 +22,6 @@ import java.util.logging.Logger;
 import org.javajdj.jservice.AbstractService;
 import org.javajdj.jservice.Service;
 import org.javajdj.jservice.Service.Status;
-import static org.javajdj.jservice.Service.Status.ACTIVE;
-import static org.javajdj.jservice.Service.Status.ERROR;
-import static org.javajdj.jservice.Service.Status.STOPPED;
 import org.javajdj.jservice.Service.StatusListener;
 
 /** A {@link Service} from (extensible) sets of {@link Runnable}s and {@link Service}s.
@@ -65,7 +62,28 @@ public class Service_FromMix
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  /** Creates a service with given name and from given {@link Runnable}s and {@link Service}s.
+   * 
+   * @param name           The service name, non-{@code null}.
+   * @param runnables      The {@link Runnable}s, may be {@code null} or empty.
+   * @param targetServices The {@link Service}s, may be {@code null} or empty.
+   * 
+   * @throws IllegalArgumentException If {@code name == null}.
+   * 
+   */
+  public Service_FromMix (final String name, final List<Runnable> runnables, final List<Service> targetServices)
+  {
+    super (name);
+    if (runnables != null)
+      this.runnables.addAll (runnables);
+    if (targetServices != null)
+      this.targetServices.addAll (targetServices);
+  }
+
   /** Creates a service from given {@link Runnable}s and {@link Service}s.
+   * 
+   * <p>
+   * The service name is set to {@code "Service_FromMix"}.
    * 
    * @param runnables      The {@link Runnable}s, may be {@code null} or empty.
    * @param targetServices The {@link Service}s, may be {@code null} or empty.
@@ -73,14 +91,26 @@ public class Service_FromMix
    */
   public Service_FromMix (final List<Runnable> runnables, final List<Service> targetServices)
   {
-    if (runnables != null)
-      this.runnables.addAll (runnables);
-    if (targetServices != null)
-      this.targetServices.addAll (targetServices);
+    this ("Service_FromMix", runnables, targetServices);
   }
 
+  /** Creates a service with given name without initial {@link Runnable}s or {@link Service}s.
+   * 
+   * @param name The service name, non-{@code null}.
+   *
+   * @throws IllegalArgumentException If {@code name == null}.
+   * 
+   */
+  public Service_FromMix (final String name)
+  {
+    this (name, null, null);
+  }
+  
   /** Creates a service without initial {@link Runnable}s or {@link Service}s.
    * 
+   * <p>
+   * The service name is set to {@code "Service_FromMix"}.
+   *
    */
   public Service_FromMix ()
   {
