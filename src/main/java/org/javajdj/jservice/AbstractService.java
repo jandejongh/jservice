@@ -71,12 +71,12 @@ public abstract class AbstractService
     this.name = name;
   }
 
-  /** Constructs a service with "No Name" as its name.
+  /** Constructs a service with "AbstractService" as its name.
    * 
    */
   public AbstractService ()
   {
-    this ("No Name");
+    this ("AbstractService");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
