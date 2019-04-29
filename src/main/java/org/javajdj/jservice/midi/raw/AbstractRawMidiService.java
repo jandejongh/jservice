@@ -19,7 +19,7 @@ package org.javajdj.jservice.midi.raw;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
-import org.javajdj.jservice.AbstractService;
+import org.javajdj.jservice.support.Service_FromMix;
 
 /** Partial implementation of a {@link RawMidiService}.
  * 
@@ -30,7 +30,7 @@ import org.javajdj.jservice.AbstractService;
  * 
  */
 public abstract class AbstractRawMidiService
-  extends AbstractService
+  extends Service_FromMix
   implements RawMidiService
 {
   
@@ -48,17 +48,11 @@ public abstract class AbstractRawMidiService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  /** Constructs a raw MIDI service with name {@code "AbstractRawMidiService"}.
-   * 
-   */
-  public AbstractRawMidiService ()
-  {
-    this ("AbstractRawMidiService");
-  }
-
   /** Constructs a raw MIDI service with given name.
    * 
    * @param name The name of the service.
+   * 
+   * @throws IllegalArgumentException If {@code name == null}.
    * 
    * @see #setName
    * 
@@ -66,6 +60,14 @@ public abstract class AbstractRawMidiService
   public AbstractRawMidiService (final String name)
   {
     super (name);
+  }
+
+  /** Constructs a raw MIDI service with name {@code "AbstractRawMidiService"}.
+   * 
+   */
+  public AbstractRawMidiService ()
+  {
+    this ("AbstractRawMidiService");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -18,9 +18,7 @@ package org.javajdj.jservice.midi.raw;
 
 import java.time.Instant;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.javajdj.jservice.Service;
 
 /** A {@link RawMidiService} that neither sends nor receives MIDI messages.
  *
@@ -42,26 +40,31 @@ public class RawMidiService_None
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // SERVICE
+  // CONSTRUCTORS / FACTORIES / CLONING
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  @Override
-  public final synchronized void startService ()
+  /** Creates a {@code None} {@link RawMidiService} with given name.
+   * 
+   * @param name The service name, non-{@code null}.
+   * 
+   * @throws IllegalArgumentException If the name is {@code null}.
+   * 
+   */
+  public RawMidiService_None (final String name)
   {
-    if (getStatus () == Status.ACTIVE)
-      return;
-    LOG.log (Level.INFO, "Starting MIDI Service [None]: {0}.", this);
-    setStatus (Status.ACTIVE);
+    super (name);
   }
 
-  @Override
-  public final synchronized void stopService ()
+  /** Creates a {@code None} {@link RawMidiService}.
+   * 
+   * <p>
+   * The service name is set to {@code "RawMidiService_None"}.
+   * 
+   */
+  public RawMidiService_None ()
   {
-    if (getStatus () == Status.STOPPED)
-      return;
-    LOG.log (Level.INFO, "Stopping MIDI Service [None]: {0}.", this);
-    setStatus (Service.Status.STOPPED);
+    this ("RawMidiService_None");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

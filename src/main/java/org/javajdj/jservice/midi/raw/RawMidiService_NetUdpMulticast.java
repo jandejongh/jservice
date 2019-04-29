@@ -18,9 +18,11 @@ package org.javajdj.jservice.midi.raw;
 
 import java.time.Instant;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.javajdj.jservice.net.UdpMulticastService;
 import org.javajdj.jservice.Service;
+import org.javajdj.util.hex.HexUtils;
 
 /** A {@link RawMidiService} implementation using MIDI over UDP multi-cast.
  *
@@ -48,22 +50,19 @@ public class RawMidiService_NetUdpMulticast
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  /** Creates a MIDI over UDP multi-cast {@link Service} with given multi-cast group and port.
+  /** Creates a MIDI over UDP multi-cast {@link Service} with given name and multi-cast group and port.
    * 
+   * @param name  The service name, non-{@code null}.
    * @param group The group, non-{@code null}.
    * @param port  The port.
    * 
-   * @throws IllegalArgumentException If the group is {@code null} or the port number is negative.
+   * @throws IllegalArgumentException If the name or group is {@code null} or the port number is negative.
    * 
    */
-  public RawMidiService_NetUdpMulticast (final String group, final int port)
+  public RawMidiService_NetUdpMulticast (final String name, final String group, final int port)
   {
-    super ();
+    super (name);
     this.udpMulticastService = new UdpMulticastService (group, port);
-    this.udpMulticastService.addStatusListener ((final Service service, final Status oldStatus, final Status newStatus) ->
-    {
-      RawMidiService_NetUdpMulticast.this.setStatus (newStatus);
-    });
     this.udpMulticastService.addMessageListener (new UdpMulticastService.MessageListener ()
     {
       @Override
@@ -77,9 +76,29 @@ public class RawMidiService_NetUdpMulticast
         RawMidiService_NetUdpMulticast.this.fireRawMidiMessageRx (message);
       }
     });
+    addTargetService (this.udpMulticastService);
+  }
+
+  /** Creates a MIDI over UDP multi-cast {@link Service} with given multi-cast group and port.
+   * 
+   * <p>
+   * The service name is set to {@code "RawMidiService_NetUdpMulticast"}.
+   * 
+   * @param group The group, non-{@code null}.
+   * @param port  The port.
+   * 
+   * @throws IllegalArgumentException If the group is {@code null} or the port number is negative.
+   * 
+   */
+  public RawMidiService_NetUdpMulticast (final String group, final int port)
+  {
+    this ("RawMidiService_NetUdpMulticast", group, port);
   }
 
   /** Creates a MIDI over UDP multi-cast {@link Service} with default multi-cast group and port.
+   * 
+   * <p>
+   * The service name is set to {@code "RawMidiService_NetUdpMulticast"}.
    * 
    * @see #DEFAULT_GROUP
    * @see #DEFAULT_PORT
@@ -176,24 +195,12 @@ public class RawMidiService_NetUdpMulticast
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // SERVICE
+  // UDP MULTICAST SERVICE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   private final UdpMulticastService udpMulticastService;
 
-  @Override
-  public void startService ()
-  {
-    this.udpMulticastService.startService ();
-  }
-
-  @Override
-  public void stopService ()
-  {
-    this.udpMulticastService.stopService ();
-  }
-  
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
   // RAW MIDI SERVICE
@@ -206,6 +213,7 @@ public class RawMidiService_NetUdpMulticast
     // XXX Sanity check on MIDI Message?
     if (rawMidiMessage != null)
     {
+      LOG.log (Level.INFO, "rawMidiMessage={0}.", HexUtils.bytesToHex (rawMidiMessage));
       this.udpMulticastService.transmit (rawMidiMessage);
     }
   }
