@@ -49,14 +49,6 @@ public abstract class AbstractMidiService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  /** Constructs a MIDI service with name {@code "AbstractMidiService"}.
-   * 
-   */
-  public AbstractMidiService ()
-  {
-    this ("AbstractMidiService");
-  }
-
   /** Constructs a MIDI service with given name.
    * 
    * @param name The name of the service.
@@ -67,6 +59,17 @@ public abstract class AbstractMidiService
   public AbstractMidiService (final String name)
   {
     super (name);
+  }
+
+  /** Constructs a MIDI service.
+   * 
+   * <p>
+   * The service name is set to {@code "AbstractMidiService"}.
+   * 
+   */
+  public AbstractMidiService ()
+  {
+    this ("AbstractMidiService");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
