@@ -43,6 +43,7 @@ import org.javajdj.jservice.activity.ActivityMonitor;
 import org.javajdj.jservice.activity.DefaultActivityMonitor;
 import org.javajdj.jservice.activity.swing.JActivityMonitor;
 import org.javajdj.jservice.swing.JServiceControl;
+import org.javajdj.swing.SwingUtilsJdJ;
 
 /** A {@link JComponent} that implements a {@link RawMidiService}, either user-supplied
  *  or through selection and booting of such a service among supported types.
@@ -80,26 +81,35 @@ public class JRawMidiService
    * raw MIDI service types ({@link RawMidiServiceType}),
    * and start/stop it.
    * 
+   * <p>
+   * In both cases, unless overridden by the {@code jServiceControl} argument,
+   * a {@link JServiceControl} component is created to control and monitor the service.
+   * Note that it can be replaced even after construction through {@link #setJServiceControl}.
+   * 
    * @param customRawMidiService The optional user-supplied {@link RawMidiService}.
+   * @param jServiceControl      The optional service-control component.
+   * 
+   * @see #setJServiceControl
    * 
    */
-  public JRawMidiService (final RawMidiService customRawMidiService)
+  public JRawMidiService (final RawMidiService customRawMidiService, final JServiceControl jServiceControl)
   {
     super ();
     this.customRawMidiService = customRawMidiService;
     setLayout (new GridLayout (6, 2, 5, 5));
     add (new JLabel ("MIDI Enabled"));
+    this.jMidiEnabledPanel = new JPanel ();
+    this.jMidiEnabledPanel.setLayout (new GridLayout (1, 1));
+    add (this.jMidiEnabledPanel);
     if (this.customRawMidiService == null)
-    {
       // XXX NEED TO BE ABLE TO ACCEPT A CUSTOM COLOR FUNCTION XXX TODO
-      this.jMidiEnabled = new JServiceControl (this, JRawMidiService.DEFAULT_STATUS_COLOR_FUNCTION);
-      add (this.jMidiEnabled);
-    }
+      this.jMidiEnabled = (jServiceControl != null ? jServiceControl
+                                                   : new JServiceControl (this, JRawMidiService.DEFAULT_STATUS_COLOR_FUNCTION));
     else
-    {
-      this.jMidiEnabled = null;
-      add (new JServiceControl (this.customRawMidiService, JRawMidiService.DEFAULT_STATUS_COLOR_FUNCTION));
-    }
+      this.jMidiEnabled = (jServiceControl != null ? jServiceControl
+                                                   : new JServiceControl (this.customRawMidiService,
+                                                                          JRawMidiService.DEFAULT_STATUS_COLOR_FUNCTION));
+    this.jMidiEnabledPanel.add (this.jMidiEnabled);
     if (this.customRawMidiService == null)
     {
       add (new JLabel ("Service Type"));
@@ -135,11 +145,57 @@ public class JRawMidiService
     add (this.jRawMidiTx);
     add (new JLabel ("Receive"));
     this.jRawMidiRx = new JActivityMonitor (null, RawMidiService.ACTIVITY_RX_NAME);
-    add (this.jRawMidiRx);
+    add (this.jRawMidiRx);    
+  }
+  
+  /** Constructs a {@link RawMidiService} that is also a {@link JComponent}.
+   * 
+   * <p>
+   * If a {@link RawMidiService} is supplied,
+   * a {@link JComponent} is created for monitoring and controlling that service.
+   * Otherwise, a {@link JComponent} is created allowing the user to select among supported
+   * raw MIDI service types ({@link RawMidiServiceType}),
+   * and start/stop it.
+   * 
+   * @param customRawMidiService The user-supplied {@link RawMidiService}, non-{@code null}.
+   * 
+   * @throws IllegalArgumentException If {@code customRawMidiService == null}.
+   * 
+   */
+  public JRawMidiService (final RawMidiService customRawMidiService)
+  {
+    this (customRawMidiService, null);
+    if (customRawMidiService == null)
+      throw new IllegalArgumentException ();
   }
 
   /** Constructs a {@link JComponent} that implements a user-configurable {@link JRawMidiService}.
    * 
+   * <p>
+   * A {@link JComponent} is created allowing the user to select among supported
+   * raw MIDI service types ({@link RawMidiServiceType}),
+   * and start/stop it.
+   * 
+   * <p>
+   * The user-supplied {@link JServiceControl} is used to control and monitor the service.
+   * 
+   * @param jServiceControl The service-control component, non-{@code null}.
+   * 
+   * @throws IllegalArgumentException If {@code jServiceControl == null}.
+   * 
+   * @see #setJServiceControl
+   * 
+   */
+  public JRawMidiService (final JServiceControl jServiceControl)
+  {
+    this (null, jServiceControl);
+    if (jServiceControl == null)
+      throw new IllegalArgumentException ();
+  }
+  
+  /** Constructs a {@link JComponent} that implements a user-configurable {@link JRawMidiService}.
+   * 
+   * <p>
    * A {@link JComponent} is created allowing the user to select among supported
    * raw MIDI service types ({@link RawMidiServiceType}),
    * and start/stop it.
@@ -147,7 +203,7 @@ public class JRawMidiService
    */
   public JRawMidiService ()
   {
-    this (null);
+    this (null, null);
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,6 +246,7 @@ public class JRawMidiService
   @Override
   public String toString ()
   {
+    // XXX Why not set the name property?
     return "JRawMidiService";
   }
   
@@ -447,7 +504,45 @@ public class JRawMidiService
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private final JServiceControl jMidiEnabled;
+  private final JPanel jMidiEnabledPanel;
+  
+  private volatile JServiceControl jMidiEnabled;
+  
+  /** Sets the service control component for this raw MIDI service.
+   * 
+   * <p>
+   * Normally, the Raw MIDI Service created by the various constructors contains a {@link JServiceControl}
+   * component for monitoring and controlling the service.
+   * Some constructors even allow a user-supplied {@link JServiceControl} instead of a privately constructed one.
+   * This allows for cases in which the Raw MIDI Service is actually part of another service,
+   * and needs to be started/stopped through that service.
+   * 
+   * <p>
+   * The present method allows for setting the {@link JServiceControl} component at any time after construction.
+   * Its need arose from cases in which the {@link JServiceControl} component could not be passed (yet)
+   * to any of the appropriate constructors.
+   * 
+   * @param jServiceControl The new service-control component, non-{@code null}.
+   * 
+   * @throws IllegalArgumentException If {@code jServiceControl == null}.
+   * 
+   */
+  public final void setJServiceControl (final JServiceControl jServiceControl)
+  {
+    if (jServiceControl == null)
+      throw new IllegalArgumentException ();
+    SwingUtilsJdJ.invokeOnSwingEDT (() ->
+    {
+      if (jServiceControl != JRawMidiService.this.jMidiEnabled)
+      {
+        this.jMidiEnabled = jServiceControl;
+        this.jMidiEnabledPanel.removeAll ();
+        this.jMidiEnabledPanel.add (this.jMidiEnabled);
+        this.jMidiEnabledPanel.validate ();
+        this.jMidiEnabledPanel.repaint ();
+      }
+    });
+  }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -457,6 +552,7 @@ public class JRawMidiService
   
   private volatile String hostOrGroup = RawMidiService_NetUdpMulticast.DEFAULT_GROUP;
 
+  // XXX javadoc...
   public String getHostOrGroup ()
   {
     return hostOrGroup;
@@ -476,6 +572,7 @@ public class JRawMidiService
   
   private final JTextField jPort;
   
+  // XXX javadoc...
   public int getPort ()
   {
     return port;
@@ -578,11 +675,13 @@ public class JRawMidiService
   
   private volatile long activityCheckInterval_ms = 50l;
 
+  // XXX javadoc...
   public final synchronized long getActivityCheckInterval_ms ()
   {
     return this.activityCheckInterval_ms;
   }
 
+  // XXX javadoc...
   public final synchronized void setActivityCheckInterval_ms (final long activityCheckInterval_ms)
   {
     this.activityCheckInterval_ms = activityCheckInterval_ms;
@@ -594,11 +693,13 @@ public class JRawMidiService
   
   private volatile long txRxActivityTimeOut_ms = 200L;
   
+  // XXX javadoc...
   public final synchronized long getTxRxActivityTimeOut_ms ()
   {
     return this.txRxActivityTimeOut_ms;
   }
 
+  // XXX javadoc...
   public final synchronized void setTxRxActivityTimeOut_ms (final long txRxActivityTimeOut_ms)
   {
     if (txRxActivityTimeOut_ms <= 0)
