@@ -28,6 +28,7 @@ import org.javajdj.jservice.midi.MidiService_FromRaw;
 import org.javajdj.jservice.midi.MidiServiceListener;
 import org.javajdj.jservice.midi.raw.RawMidiService;
 import org.javajdj.jservice.midi.raw.RawMidiServiceListener;
+import org.javajdj.jservice.swing.JServiceControl;
 
 /** A {@link JComponent} that implements a {@link MidiService}
  *  from a user-selectable {@link RawMidiService}.
@@ -66,8 +67,9 @@ public class JMidiService
    * All {@link MidiService} methods are delegated to the internally held object.
    * 
    * <p>
-   * XXX This is (still) flawed, as it allows the user to directly control the {@link JRawMidiService},
-   * which should actually be subordinate to {@link MidiService}.
+   * The {@link JServiceControl} on control the {@link JRawMidiService}
+   * is replaced with a new one that control the {@link MidiService},
+   * in order to have the raw service subordinate to this one.
    * 
    * <p>
    * XXX TODO The {@link MidiService} activities are not monitored yet.
@@ -80,6 +82,7 @@ public class JMidiService
     final JRawMidiService jRawMidiService = new JRawMidiService ();
     add (jRawMidiService);
     this.midiService = new MidiService_FromRaw (jRawMidiService);
+    jRawMidiService.setJServiceControl (new JServiceControl (this, JRawMidiService.DEFAULT_STATUS_COLOR_FUNCTION));
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
