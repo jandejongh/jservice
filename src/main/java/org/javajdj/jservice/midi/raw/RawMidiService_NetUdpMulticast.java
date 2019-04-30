@@ -18,11 +18,9 @@ package org.javajdj.jservice.midi.raw;
 
 import java.time.Instant;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.javajdj.jservice.net.UdpMulticastService;
 import org.javajdj.jservice.Service;
-import org.javajdj.util.hex.HexUtils;
 
 /** A {@link RawMidiService} implementation using MIDI over UDP multi-cast.
  *
@@ -213,7 +211,7 @@ public class RawMidiService_NetUdpMulticast
     // XXX Sanity check on MIDI Message?
     if (rawMidiMessage != null)
     {
-      LOG.log (Level.INFO, "rawMidiMessage={0}.", HexUtils.bytesToHex (rawMidiMessage));
+      // LOG.log (Level.INFO, "rawMidiMessage={0}.", HexUtils.bytesToHex (rawMidiMessage));
       this.udpMulticastService.transmit (rawMidiMessage);
     }
   }
