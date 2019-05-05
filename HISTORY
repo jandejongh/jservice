@@ -18,3 +18,10 @@ Release 1
         - Extended MIDI support: Polyphonic Key Pressure; Channel Pressure; Pitch Bend Change.
 	- Cosmetics in lay-out.
 	- Minor javadoc fixes.
+
+1.2.0 [20190505]
+        - Improvements to implementation of JRawMidiService.
+        - Check for MIDI Data Bytes (zero msb).
+        - Improved setting (default) name of MIDI services.
+        - User-supplied JServiceControl to JRawMidiService.
+        - JMidiService now overrides the JServiceControl of JRawMidiService.
