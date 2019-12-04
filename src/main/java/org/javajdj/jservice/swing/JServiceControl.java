@@ -17,14 +17,14 @@
 package org.javajdj.jservice.swing;
 
 import java.awt.Color;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Map;
 import java.util.function.Function;
 import javax.swing.JComponent;
 import org.javajdj.jservice.Service;
-import org.javajdj.swing.DefaultMouseListener;
-import org.javajdj.swing.JColorCheckBox;
+import org.javajdj.jswing.jcolorcheckbox.JColorCheckBox;
 
 /** A tiny {@link JComponent} visualizing the {@link Service.Status} of a {@link Service} through color coding.
  *
@@ -108,7 +108,7 @@ public class JServiceControl
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private final MouseListener mouseListener = new DefaultMouseListener ()
+  private final MouseListener mouseListener = new MouseAdapter ()
   {
     @Override
     public final void mouseClicked (final MouseEvent e)

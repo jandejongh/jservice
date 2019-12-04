@@ -22,7 +22,8 @@ import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.javajdj.jservice.Service;
 import org.javajdj.jservice.activity.ActivityMonitor;
-import org.javajdj.swing.JColorCheckBox;
+import org.javajdj.jswing.jcolorcheckbox.JColorCheckBox;
+import org.javajdj.jswing.jcolorcheckbox.JColorCheckBox.JBoolean;
 
 /** A check box that visualizes an {@link ActivityMonitor}.
  *

@@ -43,7 +43,7 @@ import org.javajdj.jservice.activity.ActivityMonitor;
 import org.javajdj.jservice.activity.DefaultActivityMonitor;
 import org.javajdj.jservice.activity.swing.JActivityMonitor;
 import org.javajdj.jservice.swing.JServiceControl;
-import org.javajdj.swing.SwingUtilsJdJ;
+import org.javajdj.jswing.util.SwingUtilsJdJ;
 
 /** A {@link JComponent} that implements a {@link RawMidiService}, either user-supplied
  *  or through selection and booting of such a service among supported types.

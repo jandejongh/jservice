@@ -22,8 +22,8 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
 import org.javajdj.jservice.Service;
-import org.javajdj.swing.JColorCheckBox;
-import org.javajdj.swing.SwingUtilsJdJ;
+import org.javajdj.jswing.jcolorcheckbox.JColorCheckBox;
+import org.javajdj.jswing.util.SwingUtilsJdJ;
 
 /** A tiny {@link JComponent} visualizing the {@link Service.Status} of a {@link Service} through color coding.
  *
