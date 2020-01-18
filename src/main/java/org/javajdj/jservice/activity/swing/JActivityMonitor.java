@@ -58,8 +58,7 @@ public class JActivityMonitor
    * 
    * @param activityMonitor The activity monitor to use, may be {@code null}.
    * @param activity        The activity on the monitor to visualize, may be {@code null}.
-   * @param colorFunction   The color function,
-   *                          see {@link JBoolean#JBoolean(java.util.function.Function)}.
+   * @param colorFunction   The color function, see {@link JBoolean}.
    * 
    */
   public JActivityMonitor
@@ -86,8 +85,7 @@ public class JActivityMonitor
    * 
    * @param activityMonitor The activity monitor to use, may be {@code null}.
    * @param activity        The activity on the monitor to visualize, may be {@code null}.
-   * @param colorMap        The color map,
-   *                          see {@link JBoolean#JBoolean(java.util.Map)}.
+   * @param colorMap        The color map, see {@link JBoolean}.
    * 
    */
   public JActivityMonitor
