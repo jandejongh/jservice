@@ -50,7 +50,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>jswing</artifactId>
-      <version>0.1</version>
+      <version>0.7</version>
     </dependency>
   </dependencies>
     
